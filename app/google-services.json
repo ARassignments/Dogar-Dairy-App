@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "989609807796",
+    "firebase_url": "https://dogar-dairy-default-rtdb.firebaseio.com",
+    "project_id": "dogar-dairy",
+    "storage_bucket": "dogar-dairy.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:989609807796:android:1b33f2700f84d13b872ce1",
+        "android_client_info": {
+          "package_name": "com.example.dogardairy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDno8__YEb6YQvtAiUvVHeayUD-ql_PFFA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
