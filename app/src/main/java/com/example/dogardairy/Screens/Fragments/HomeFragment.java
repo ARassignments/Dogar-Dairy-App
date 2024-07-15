@@ -8,8 +8,10 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import com.example.dogardairy.R;
+import com.example.dogardairy.Screens.MonthlySupplyActivity;
 import com.example.dogardairy.Screens.SeeMoreActivity;
 import com.example.dogardairy.Screens.SettingsActivity;
 
@@ -32,6 +34,13 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(inflater.getContext(), SettingsActivity.class));
+            }
+        });
+
+        view.findViewById(R.id.monthlySupplyBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(inflater.getContext(), MonthlySupplyActivity.class));
             }
         });
         return view;
