@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    style="@style/ScreenBg"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Screens.LoginActivity">
@@ -26,25 +26,71 @@
             android:layout_marginTop="20dp"
             style="@style/authTitle"/>
 
-        <EditText
-            android:id="@+id/emailInput"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Email"
-            android:layout_marginTop="16dp"
-            android:inputType="textEmailAddress"
-            android:maxLength="40"
-            style="@style/inputText"/>
+<!--        <EditText-->
+<!--            android:id="@+id/emailInput"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:hint="Email"-->
+<!--            android:layout_marginTop="16dp"-->
+<!--            android:inputType="textEmailAddress"-->
+<!--            android:maxLength="40"-->
+<!--            style="@style/inputText"/>-->
 
-        <EditText
-            android:id="@+id/pwdInput"
+<!--        <EditText-->
+<!--            android:id="@+id/pwdInput"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:hint="Password"-->
+<!--            android:layout_marginTop="16dp"-->
+<!--            android:inputType="textPassword"-->
+<!--            android:maxLength="20"-->
+<!--            style="@style/inputText"/>-->
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/emailLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Password"
             android:layout_marginTop="16dp"
-            android:inputType="textPassword"
-            android:maxLength="20"
-            style="@style/inputText"/>
+            app:endIconMode="clear_text"
+            app:counterEnabled="false"
+            app:counterMaxLength="40"
+            app:helperTextEnabled="false"
+            app:helperText=""
+            android:hint="Email"
+            style="@style/inputTextMaterial">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/emailInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:maxLength="40"
+                style="@style/inputTextEditMaterial"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/pwdLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            app:endIconMode="password_toggle"
+            app:counterEnabled="false"
+            app:counterMaxLength="20"
+            app:helperTextEnabled="false"
+            app:helperText=""
+            android:hint="Password"
+            style="@style/inputTextMaterial">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/pwdInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:maxLength="20"
+                style="@style/inputTextEditMaterial"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -95,7 +141,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:layout_marginTop="16dp">
+            android:layout_marginTop="20dp">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -115,4 +161,4 @@
 
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

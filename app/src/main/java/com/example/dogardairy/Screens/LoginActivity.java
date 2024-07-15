@@ -31,6 +31,8 @@ import com.example.dogardairy.MainActivity;
 import com.example.dogardairy.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -41,7 +43,9 @@ import com.google.firebase.database.ValueEventListener;
 
 public class LoginActivity extends AppCompatActivity {
 
-    EditText emailInput, pwdInput;
+//    EditText emailInput, pwdInput;
+    TextInputLayout emailLayout, pwdLayout;
+    TextInputEditText emailInput, pwdInput;
     Button loginBtn;
     CheckBox rememberMe;
     ProgressBar loader;
@@ -62,6 +66,8 @@ public class LoginActivity extends AppCompatActivity {
             finish();
         }
 
+        emailLayout = findViewById(R.id.emailLayout);
+        pwdLayout = findViewById(R.id.pwdLayout);
         emailInput = findViewById(R.id.emailInput);
         pwdInput = findViewById(R.id.pwdInput);
         rememberMe = findViewById(R.id.rememberMe);
@@ -125,13 +131,13 @@ public class LoginActivity extends AppCompatActivity {
     public boolean emailValidation(){
         String input = emailInput.getText().toString().trim();
         if(input.equals("")){
-            emailInput.setError("Email Address is Required!!!");
+            emailLayout.setError("Email Address is Required!!!");
             return false;
         } else if(!Patterns.EMAIL_ADDRESS.matcher(input).matches()){
-            emailInput.setError("Enter Valid Email Address!!!");
+            emailLayout.setError("Enter Valid Email Address!!!");
             return false;
         } else {
-            emailInput.setError(null);
+            emailLayout.setError(null);
             return true;
         }
     }
@@ -139,13 +145,13 @@ public class LoginActivity extends AppCompatActivity {
     public boolean pwdValidation(){
         String input = pwdInput.getText().toString().trim();
         if(input.equals("")){
-            pwdInput.setError("Password is Required!!!");
+            pwdLayout.setError("Password is Required!!!");
             return false;
         } else if(input.length() < 8){
-            pwdInput.setError("Password at least 8 Characters!!!");
+            pwdLayout.setError("Password at least 8 Characters!!!");
             return false;
         } else {
-            pwdInput.setError(null);
+            pwdLayout.setError(null);
             return true;
         }
     }
