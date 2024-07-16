@@ -141,7 +141,8 @@ public class MonthlySupplyActivity extends AppCompatActivity {
                             MonthlyModel model = new MonthlyModel(ds.getKey(),
                                     ds.child("name").getValue().toString(),
                                     ds.child("contact").getValue().toString(),
-                                    ds.child("balance").getValue().toString()
+                                    ds.child("balance").getValue().toString(),
+                                    ds.child("MonthlyDetail").getValue().toString()
                             );
                             datalist.add(model);
                         } else {
@@ -149,7 +150,8 @@ public class MonthlySupplyActivity extends AppCompatActivity {
                                 MonthlyModel model = new MonthlyModel(ds.getKey(),
                                         ds.child("name").getValue().toString(),
                                         ds.child("contact").getValue().toString(),
-                                        ds.child("balance").getValue().toString()
+                                        ds.child("balance").getValue().toString(),
+                                        ds.child("MonthlyDetail").getValue().toString()
                                 );
                                 datalist.add(model);
                             }
@@ -335,7 +337,8 @@ public class MonthlySupplyActivity extends AppCompatActivity {
                 HashMap<String, String> mydata = new HashMap<String, String>();
                 mydata.put("name", nameInput.getText().toString().trim());
                 mydata.put("contact", contactInput.getText().toString().trim());
-                mydata.put("balance", "00");
+                mydata.put("balance", "0");
+                mydata.put("MonthlyDetail", "");
                 MainActivity.db.child("Monthly").push().setValue(mydata);
                 message.setText("Person Added Successfully!!!");
             } else if(purpose.equals("edit")){
@@ -420,6 +423,7 @@ public class MonthlySupplyActivity extends AppCompatActivity {
                     Intent intent = new Intent(context, MonthlySupplyDetailActivity.class);
                     intent.putExtra("MonthlyId",data.get(i).getId());
                     intent.putExtra("balance",data.get(i).getBalance());
+                    intent.putExtra("contact",data.get(i).getContact());
                     startActivity(intent);
                 }
             });

@@ -170,6 +170,20 @@
         <item name="android:drawablePadding">12dp</item>
     </style>
 
+
+    <!--    Date Picker-->
+
+    <style name="DatePicker" parent="Theme.AppCompat.Light">
+        <item name="colorAccent">@color/primary_10</item>
+        <item name="colorControlActivated">@color/primary_50</item>
+        <item name="colorControlHighlight">@color/primary_30</item>
+        <item name="android:textColorPrimary">@color/neutral_10</item>
+    </style>
+
+    <style name="CalenderViewWeekCustomText">
+        <item name="android:textColor">@color/primary_10</item>
+    </style>
+
     <!--    Input Field-->
 
     <style name="inputText">

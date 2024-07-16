@@ -1,17 +1,26 @@
 package com.example.dogardairy.Models;
 
 public class MonthlyModel {
-    String id, name , contact, balance;
+    String id, name , contact, balance, MonthlyDetail;
 
     public MonthlyModel(){
 
     }
 
-    public MonthlyModel(String id, String name, String contact, String balance) {
+    public MonthlyModel(String id, String name, String contact, String balance, String MonthlyDetail) {
         this.id = id;
         this.name = name;
         this.contact = contact;
         this.balance = balance;
+        this.MonthlyDetail = MonthlyDetail;
+    }
+
+    public String getMonthlyDetail() {
+        return MonthlyDetail;
+    }
+
+    public void setMonthlyDetail(String monthlyDetail) {
+        MonthlyDetail = monthlyDetail;
     }
 
     public String getId() {

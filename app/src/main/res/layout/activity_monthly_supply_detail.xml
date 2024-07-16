@@ -46,4 +46,258 @@
         android:layout_height="1dp"
         style="@style/horizontalRow"/>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="30dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date"
+            android:layout_marginHorizontal="8dp"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            style="@style/authTitle"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Qty"
+            android:layout_marginHorizontal="8dp"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            style="@style/authTitle"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Amount"
+            android:layout_marginHorizontal="8dp"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            style="@style/authTitle"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/notfoundContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:layout_marginHorizontal="30dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            style="@style/notFoundImage"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginTop="30dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Not Found"
+                android:textSize="18sp"
+                style="@style/authTitle"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/listView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:divider="@null"
+        android:dividerHeight="0dp"
+        android:visibility="visible"
+        tools:listitem="@layout/monthly_supply_custom_listview"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="30dp"
+        style="@style/customButton">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Total Quantitiy"
+                android:layout_marginHorizontal="8dp"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                style="@style/authTitle"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/totalQty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    style="@style/authLabel"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=" kg"
+                    style="@style/authLabel"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Total Amount"
+                android:layout_marginHorizontal="8dp"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                style="@style/authTitle"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Rs "
+                    style="@style/authLabel"/>
+
+                <TextView
+                    android:id="@+id/grandTotalAmount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    style="@style/authLabel"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="/-"
+                    style="@style/authLabel"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="30dp"
+        android:layout_marginTop="16dp">
+
+        <ImageView
+            android:id="@+id/sendMessageBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/message"
+            android:layout_marginEnd="8dp"
+            style="@style/appBarIcon"/>
+
+        <FrameLayout
+            android:id="@+id/sendWhatsappMessageBtn"
+            android:layout_width="24dp"
+            android:layout_height="24dp">
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:scaleType="fitXY"
+                android:layout_gravity="center"
+                android:src="@drawable/whatsapp"/>
+
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Balanced Amount:"
+            android:layout_marginHorizontal="8dp"
+            android:layout_weight="1"
+            android:textAlignment="textEnd"
+            style="@style/authTitle"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rs "
+            style="@style/authLabel"/>
+
+        <TextView
+            android:id="@+id/balancedAmount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            style="@style/authLabel"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="/-"
+            style="@style/authLabel"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="30dp"
+        android:layout_marginBottom="30dp"
+        android:layout_marginTop="20dp">
+
+        <Button
+            android:id="@+id/addQuantityBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Add Quantity"
+            android:layout_marginRight="16dp"
+            android:drawableStart="@drawable/plus"
+            style="@style/flatIconButton"/>
+
+        <Button
+            android:id="@+id/unpaidBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:text="Unpaid"
+            android:drawableStart="@drawable/wallet"
+            style="@style/flatIconButton"/>
+
+    </LinearLayout>
+
 </LinearLayout>
