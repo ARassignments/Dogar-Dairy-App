@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:paddingHorizontal="30dp"
+    android:paddingTop="20dp"
+    android:background="@color/transparent">
+
+    <LinearLayout
+        android:id="@+id/listItem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="15dp"
+        style="@style/customButton">
+
+        <TextView
+            android:id="@+id/sno"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1"
+            style="@style/authLabel"/>
+
+        <TextView
+            android:id="@+id/itemName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Item Name"
+            android:layout_marginLeft="16dp"
+            style="@style/authTitle"/>
+
+        <TextView
+            android:id="@+id/itemAmount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rs 0/-"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            style="@style/authLabel"/>
+
+        <ImageView
+            android:id="@+id/menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/menu"
+            android:layout_marginStart="16dp"
+            style="@style/appBarIcon" />
+
+    </LinearLayout>
+
+</LinearLayout>

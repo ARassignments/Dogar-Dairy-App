@@ -253,6 +253,8 @@ public class RegisterActivity extends AppCompatActivity {
                                 obj.put("email",auth.getCurrentUser().getEmail());
                                 obj.put("image","");
                                 obj.put("role","user");
+                                obj.put("milkRate","0");
+                                obj.put("stockRate","0");
                                 obj.put("created_on",currentDate);
                                 obj.put("status","1");
 

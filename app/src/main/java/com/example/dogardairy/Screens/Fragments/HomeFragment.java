@@ -12,7 +12,9 @@ import android.widget.FrameLayout;
 
 import com.example.dogardairy.R;
 import com.example.dogardairy.Screens.MonthlySupplyActivity;
+import com.example.dogardairy.Screens.OtherItemsActivity;
 import com.example.dogardairy.Screens.SeeMoreActivity;
+import com.example.dogardairy.Screens.SettingRateActivity;
 import com.example.dogardairy.Screens.SettingsActivity;
 
 public class HomeFragment extends Fragment {
@@ -41,6 +43,20 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(inflater.getContext(), MonthlySupplyActivity.class));
+            }
+        });
+
+        view.findViewById(R.id.settingRatesBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(inflater.getContext(), SettingRateActivity.class));
+            }
+        });
+
+        view.findViewById(R.id.otherItemsBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(inflater.getContext(), OtherItemsActivity.class));
             }
         });
         return view;

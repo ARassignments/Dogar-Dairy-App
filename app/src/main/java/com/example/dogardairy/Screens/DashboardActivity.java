@@ -27,7 +27,7 @@ public class DashboardActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
     static String UID = "";
-    static String name, email, role, image, created_on;
+    static String name, email, role, image, milkRate, stockRate, created_on;
     BottomNavigationView bottomAppBar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +57,8 @@ public class DashboardActivity extends AppCompatActivity {
                         email = snapshot.child("email").getValue().toString();
                         image = snapshot.child("image").getValue().toString();
                         role = snapshot.child("role").getValue().toString();
+                        milkRate = snapshot.child("milkRate").getValue().toString();
+                        stockRate = snapshot.child("stockRate").getValue().toString();
                         created_on = snapshot.child("created_on").getValue().toString();
                     }
                 }
@@ -70,6 +72,9 @@ public class DashboardActivity extends AppCompatActivity {
 
         // Check User's Status
         MainActivity.checkStatus(DashboardActivity.this,UID);
+
+        // Check Toaster
+        MainActivity.checkMaintainance(DashboardActivity.this);
 
         // Set Default Home Fragment
         getSupportFragmentManager().beginTransaction().add(R.id.frame,new HomeFragment()).commit();
@@ -110,6 +115,14 @@ public class DashboardActivity extends AppCompatActivity {
 
     public static String getRole(){
         return role;
+    }
+
+    public static String getMilkRate() {
+        return milkRate;
+    }
+
+    public static String getStockRate() {
+        return stockRate;
     }
 
     public static String getCreatedOn(){

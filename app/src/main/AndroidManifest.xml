@@ -9,9 +9,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_SMS"/>
-    <uses-permission android:name="android.permission.SEND_SMS"/>
-    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
 
     <application
         android:allowBackup="true"
@@ -24,15 +24,21 @@
         android:theme="@style/Theme.DogarDairy"
         tools:targetApi="31">
         <activity
+            android:name=".Screens.OtherItemsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Screens.SettingRateActivity"
+            android:exported="false" />
+        <activity
             android:name=".Screens.MonthlySupplyDetailActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="DiscouragedApi,LockedOrientationActivity"/>
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
             android:name=".Screens.MonthlySupplyActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="DiscouragedApi,LockedOrientationActivity"/>
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
             android:name=".Screens.SeeMoreActivity"
             android:exported="false"

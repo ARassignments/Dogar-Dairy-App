@@ -1,0 +1,8 @@
+Alias: key0
+Password: 12345678
+First and Last Name: Dogar Dairy
+Organizational Unit: Dogar Dairy
+Organization: Dogar Dairy
+City or Locality: Karachi
+State or Province: Sindh
+Country Code: 92

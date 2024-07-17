@@ -3,6 +3,7 @@ package com.example.dogardairy.Screens;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -35,6 +36,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.dogardairy.MainActivity;
+import com.example.dogardairy.Models.ItemsModel;
 import com.example.dogardairy.Models.MonthlyDetailModel;
 import com.example.dogardairy.Models.MonthlyModel;
 import com.example.dogardairy.R;
@@ -59,7 +61,10 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MonthlySupplyDetailActivity extends AppCompatActivity {
 
-    String MonthlyId, currentDate, contact;
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
+    static String UID = "";
+    String MonthlyId, currentDate, contact, personName;
     ListView listView;
     LinearLayout notfoundContainer;
     TextView totalQty, grandTotalAmount, balancedAmount, date;
@@ -67,9 +72,10 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
     FrameLayout sendWhatsappMessageBtn;
     Button addQuantityBtn, unpaidBtn;
     ArrayList<MonthlyDetailModel> datalist = new ArrayList<>();
+    ArrayList<ItemsModel> datalistItems = new ArrayList<>();
 
-    //    Add Quantity Dialog Elements
-    Dialog addQtyDialog, unpaidDialog;
+    //    Dialog Elements
+    Dialog addQtyDialog, unpaidDialog, itemsDialog;
     TextView dateView, totalAmountUnpaid, balanceAmountUnpaid;
     TextInputEditText qtyInput, amountInput, itemNameInput, itemAmountInput, givenAmountInput;
     TextInputLayout qtyLayout, amountLayout, itemNameLayout, itemAmountLayout, givenAmountLayout;
@@ -81,6 +87,8 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_monthly_supply_detail);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        sharedPreferences = getSharedPreferences("myData",MODE_PRIVATE);
+        editor = sharedPreferences.edit();
 
         listView = findViewById(R.id.listView);
         notfoundContainer = findViewById(R.id.notfoundContainer);
@@ -93,6 +101,10 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         addQuantityBtn = findViewById(R.id.addQuantityBtn);
         unpaidBtn = findViewById(R.id.unpaidBtn);
 
+        if(!sharedPreferences.getString("UID","").equals("")){
+            UID = sharedPreferences.getString("UID","").toString();
+        }
+
         //date picker start
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("M/yyyy");
@@ -104,6 +116,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         if (extras != null) {
             MonthlyId = extras.getString("MonthlyId");
             contact = extras.getString("contact");
+            personName = extras.getString("personName");
         }
 
         MainActivity.db.child("Monthly").child(MonthlyId).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -123,7 +136,20 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         sendWhatsappMessageBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String txt = "DOGER DAIRY \n This is your today's Milk report \n Total price of Milk is: Rs "+grandTotalAmount.getText().toString()+"/- \n Total quantity is: "+totalQty.getText().toString()+"Kg \n Your pending Balance: Rs "+balancedAmount.getText().toString()+"/-";
+
+                String balance = balancedAmount.getText().toString().trim();
+                if(balancedAmount.getText().toString().trim().equals(grandTotalAmount.getText().toString().trim())){
+                    balance = "0";
+                }
+
+                String txt = "                ATTARI DAIRY \n" +
+                        "***** Monthly Milk Report ***** \n" +
+                        "Name: "+personName+"\n" +
+                        "Milk Rate is: Rs "+DashboardActivity.getMilkRate()+"/- \n" +
+                        "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
+                        "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
+                        "Your pending Balance: Rs "+balance+"/-\n" +
+                        " ----- JazakAllah -----";
 
                 PackageManager packageManager = getPackageManager();
                 try {
@@ -155,7 +181,20 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         sendMessageBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String txt = "DOGER DAIRY \n This is your today's Milk report \n Total price of Milk is: Rs "+grandTotalAmount.getText().toString()+"/- \n Total quantity is: "+totalQty.getText().toString()+"Kg \n Your pending Balance: Rs "+balancedAmount.getText().toString()+"/-";
+
+                String balance = balancedAmount.getText().toString().trim();
+                if(balancedAmount.getText().toString().trim().equals(grandTotalAmount.getText().toString().trim())){
+                    balance = "0";
+                }
+
+                String txt = "                ATTARI DAIRY \n" +
+                        "***** Monthly Milk Report ***** \n" +
+                        "Name: "+personName+"\n" +
+                        "Milk Rate is: Rs "+DashboardActivity.getMilkRate()+"/- \n" +
+                        "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
+                        "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
+                        "Your pending Balance: Rs "+balance+"/-\n" +
+                        " ----- JazakAllah -----";
 
                 try {
                     ArrayList<String> parts = MainActivity.mySmsManager.divideMessage(txt);
@@ -450,6 +489,80 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             }
         });
 
+        MainActivity.db.child("Users").child(UID).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    amountInput.setText(snapshot.child("milkRate").getValue().toString());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        addOtherItemBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                itemsDialog = new Dialog(MonthlySupplyDetailActivity.this);
+                itemsDialog.setContentView(R.layout.dialog_other_items_list);
+                itemsDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                itemsDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                itemsDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                itemsDialog.getWindow().setGravity(Gravity.CENTER);
+                itemsDialog.setCancelable(false);
+                itemsDialog.setCanceledOnTouchOutside(false);
+                ListView listViewItems = itemsDialog.findViewById(R.id.listView);
+                Button cancelBtnItems = itemsDialog.findViewById(R.id.cancelBtn);
+                LinearLayout notfoundContainerItems = itemsDialog.findViewById(R.id.notfoundContainer);
+
+                MainActivity.db.child("OtherItems").child(UID).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.exists()){
+                            datalistItems.clear();
+                            for (DataSnapshot ds: snapshot.getChildren()){
+                                ItemsModel model = new ItemsModel(ds.getKey(),
+                                        ds.child("name").getValue().toString(),
+                                        ds.child("amount").getValue().toString()
+                                );
+                                datalistItems.add(model);
+                            }
+                            if(datalistItems.size() > 0){
+                                listViewItems.setVisibility(View.VISIBLE);
+                                notfoundContainerItems.setVisibility(View.GONE);
+                                Collections.reverse(datalist);
+                                MyAdapterItems adapter = new MyAdapterItems(MonthlySupplyDetailActivity.this,datalistItems);
+                                listViewItems.setAdapter(adapter);
+                            } else {
+                                listViewItems.setVisibility(View.GONE);
+                                notfoundContainerItems.setVisibility(View.VISIBLE);
+                            }
+                        } else {
+                            listViewItems.setVisibility(View.GONE);
+                            notfoundContainerItems.setVisibility(View.VISIBLE);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+                cancelBtnItems.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        itemsDialog.dismiss();
+                    }
+                });
+
+                itemsDialog.show();
+            }
+        });
+
         addDataBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -696,19 +809,31 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         @Override
         public View getView(int i, View convertView, ViewGroup parent) {
             View customListItem = LayoutInflater.from(context).inflate(R.layout.monthly_supply_custom_listview,null);
-            TextView sno, date, qty, amount;
+            TextView sno, date, qty, amount, itemName, itemAmount;
             ImageView delete;
+            LinearLayout itemContainer;
 
             sno = customListItem.findViewById(R.id.sno);
             date = customListItem.findViewById(R.id.date);
             qty = customListItem.findViewById(R.id.qty);
             amount = customListItem.findViewById(R.id.amount);
             delete = customListItem.findViewById(R.id.delete);
+            itemContainer = customListItem.findViewById(R.id.itemContainer);
+            itemName = customListItem.findViewById(R.id.itemName);
+            itemAmount = customListItem.findViewById(R.id.itemAmount);
 
             sno.setText(""+(i+1));
             date.setText(data.get(i).getDate());
             qty.setText(data.get(i).getQty()+"kg");
             amount.setText("Rs "+data.get(i).getTotalAmount()+"/-");
+            itemName.setText(data.get(i).getItemName());
+            itemAmount.setText("Rs "+data.get(i).getItemAmount()+"/-");
+
+            if(!data.get(i).getItemName().equals("")){
+                itemContainer.setVisibility(View.VISIBLE);
+            } else {
+                itemContainer.setVisibility(View.GONE);
+            }
 
             delete.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -787,6 +912,79 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                     });
 
                     actiondialog.show();
+                }
+            });
+
+            return customListItem;
+        }
+    }
+
+    class MyAdapterItems extends BaseAdapter {
+
+        Context context;
+        ArrayList<ItemsModel> data;
+
+        public MyAdapterItems(Context context, ArrayList<ItemsModel> data) {
+            this.context = context;
+            this.data = data;
+        }
+        @Override
+        public int getCount() {
+            return data.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return null;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int i, View convertView, ViewGroup parent) {
+            View customListItem = LayoutInflater.from(context).inflate(R.layout.items_custom_listview,null);
+            TextView sno, itemName, itemAmount;
+            ImageView menu;
+            LinearLayout listItem;
+
+            sno = customListItem.findViewById(R.id.sno);
+            listItem = customListItem.findViewById(R.id.listItem);
+            itemName = customListItem.findViewById(R.id.itemName);
+            itemAmount = customListItem.findViewById(R.id.itemAmount);
+            menu = customListItem.findViewById(R.id.menu);
+
+            sno.setText(""+(i+1));
+            itemName.setText(data.get(i).getName());
+            itemAmount.setText("Rs "+data.get(i).getAmount()+"/-");
+            menu.setVisibility(View.GONE);
+
+            listItem.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    itemNameInput.setText(data.get(i).getName());
+                    itemAmountInput.setText(data.get(i).getAmount());
+                    Dialog dialog = new Dialog(context);
+                    dialog.setContentView(R.layout.dialog_success);
+                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                    dialog.getWindow().setGravity(Gravity.CENTER);
+                    dialog.setCanceledOnTouchOutside(false);
+                    dialog.setCancelable(false);
+                    TextView msg = dialog.findViewById(R.id.msgDialog);
+                    msg.setText("Item Selected!!!");
+                    dialog.show();
+
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            dialog.dismiss();
+                            itemsDialog.dismiss();
+                        }
+                    },2000);
                 }
             });
 

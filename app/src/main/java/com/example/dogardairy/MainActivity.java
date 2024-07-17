@@ -14,8 +14,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.telephony.SmsManager;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -103,14 +105,13 @@ public class MainActivity extends AppCompatActivity {
             loaddialog.setCancelable(false);
             loaddialog.setCanceledOnTouchOutside(false);
             loaddialog.show();
-            TextView messageTextViewTwo = loaddialog.findViewById(R.id.msgDialog);
-            messageTextViewTwo.setText("Please Connect To The Internet To Proceed Further!!!");
-            new Handler().postDelayed(new Runnable() {
+            Button retryBtn = loaddialog.findViewById(R.id.retryBtn);
+            retryBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void run() {
+                public void onClick(View v) {
                     loaddialog.dismiss();
                 }
-            }, 4000);
+            });
             return false;
         }
     }
@@ -131,6 +132,41 @@ public class MainActivity extends AppCompatActivity {
                     dialog.setCancelable(false);
                     TextView msg = dialog.findViewById(R.id.msgDialog);
                     msg.setText("Your Account Is Suspended By Admin");
+
+                    String status = snapshot.child("status").getValue().toString();
+                    if(status.equals("0")){
+                        dialog.show();
+                    } else if(status.equals("1")){
+                        dialog.dismiss();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    public static void checkMaintainance(Context context){
+        db.child("MessageToaster").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+
+                    Dialog dialog = new Dialog(context);
+                    dialog.setContentView(R.layout.dialog_maintainance);
+                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                    dialog.getWindow().setGravity(Gravity.CENTER);
+                    dialog.setCanceledOnTouchOutside(false);
+                    dialog.setCancelable(false);
+                    TextView title = dialog.findViewById(R.id.title);
+                    TextView message = dialog.findViewById(R.id.message);
+                    title.setText(snapshot.child("title").getValue().toString());
+                    message.setText(snapshot.child("message").getValue().toString());
 
                     String status = snapshot.child("status").getValue().toString();
                     if(status.equals("0")){

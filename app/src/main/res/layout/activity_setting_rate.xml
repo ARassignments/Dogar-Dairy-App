@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    style="@style/ScreenBg"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Screens.SettingRateActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="30dp"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/backBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/back"
+            style="@style/appBarIcon"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Setting Rate"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="2dp"
+            android:layout_weight="1"
+            android:textAlignment="textStart"
+            style="@style/appBarTitle"/>
+
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Monday, \nJuly 15, 2024"
+            android:textAlignment="textEnd"
+            style="@style/appBarText"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        style="@style/horizontalRow"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="20dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginHorizontal="30dp">
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:padding="30dp"
+                    android:orientation="vertical"
+                    style="@style/customButton">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Set Supply Milk Rate"
+                        android:textAlignment="center"
+                        android:layout_marginBottom="20dp"
+                        style="@style/authTitle"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/supplyAmountLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        app:endIconMode="clear_text"
+                        app:counterMaxLength="5"
+                        app:helperText="Only Digits Allowed"
+                        android:hint="Enter Amount Here..."
+                        app:prefixText="Rs "
+                        app:suffixText="/-"
+                        style="@style/inputTextMaterial">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/supplyAmountInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number"
+                            android:maxLength="5"
+                            style="@style/inputTextEditMaterial"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <Button
+                        android:id="@+id/supplyMilkBtn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Submit"
+                        style="@style/flatButton"/>
+
+
+                </LinearLayout>
+
+            </ScrollView>
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="20dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="30dp"
+            android:layout_marginHorizontal="30dp">
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:padding="30dp"
+                    android:orientation="vertical"
+                    style="@style/customButton">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Set Stock Milk Rate"
+                        android:textAlignment="center"
+                        android:layout_marginBottom="20dp"
+                        style="@style/authTitle"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/stockAmountLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        app:endIconMode="clear_text"
+                        app:counterMaxLength="5"
+                        app:helperText="Only Digits Allowed"
+                        android:hint="Enter Amount Here..."
+                        app:prefixText="Rs "
+                        app:suffixText="/-"
+                        style="@style/inputTextMaterial">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/stockAmountInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number"
+                            android:maxLength="5"
+                            style="@style/inputTextEditMaterial"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <Button
+                        android:id="@+id/stockMilkBtn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Submit"
+                        style="@style/flatButton"/>
+
+                </LinearLayout>
+
+            </ScrollView>
+
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+
+</LinearLayout>

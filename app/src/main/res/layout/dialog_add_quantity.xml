@@ -121,7 +121,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
                     app:endIconMode="clear_text"
-                    app:counterMaxLength="30"
+                    app:counterMaxLength="40"
                     app:helperText="Only Text Allowed"
                     android:hint="Item Name Here..."
                     style="@style/inputTextMaterial">
@@ -131,10 +131,11 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textPersonName"
-                        android:maxLength="30"
+                        android:maxLength="40"
                         android:focusableInTouchMode="false"
                         android:allowClickWhenDisabled="false"
                         android:editable="false"
+                        android:focusable="false"
                         style="@style/inputTextEditMaterial"
                         tools:ignore="Deprecated" />
 

@@ -92,6 +92,8 @@ public class UsersActivity extends AppCompatActivity {
                                         dd.child("email").getValue().toString(),
                                         dd.child("image").getValue().toString(),
                                         dd.child("role").getValue().toString(),
+                                        dd.child("milkRate").getValue().toString(),
+                                        dd.child("stockRate").getValue().toString(),
                                         dd.child("created_on").getValue().toString(),
                                         dd.child("status").getValue().toString()
                                 ));
@@ -144,6 +146,8 @@ public class UsersActivity extends AppCompatActivity {
                                                 dd.child("email").getValue().toString(),
                                                 dd.child("image").getValue().toString(),
                                                 dd.child("role").getValue().toString(),
+                                                dd.child("milkRate").getValue().toString(),
+                                                dd.child("stockRate").getValue().toString(),
                                                 dd.child("created_on").getValue().toString(),
                                                 dd.child("status").getValue().toString()
                                         ));
@@ -177,6 +181,8 @@ public class UsersActivity extends AppCompatActivity {
                                                 dd.child("email").getValue().toString(),
                                                 dd.child("image").getValue().toString(),
                                                 dd.child("role").getValue().toString(),
+                                                dd.child("milkRate").getValue().toString(),
+                                                dd.child("stockRate").getValue().toString(),
                                                 dd.child("created_on").getValue().toString(),
                                                 dd.child("status").getValue().toString()
                                         ));

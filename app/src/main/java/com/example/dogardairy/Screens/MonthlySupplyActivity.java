@@ -250,7 +250,7 @@ public class MonthlySupplyActivity extends AppCompatActivity {
         });
 
         if(purpose.equals("edit")){
-            title.setText("Edit Book");
+            title.setText("Edit Person");
             MainActivity.db.child("Monthly").child(productId).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -424,6 +424,7 @@ public class MonthlySupplyActivity extends AppCompatActivity {
                     intent.putExtra("MonthlyId",data.get(i).getId());
                     intent.putExtra("balance",data.get(i).getBalance());
                     intent.putExtra("contact",data.get(i).getContact());
+                    intent.putExtra("personName",data.get(i).getName());
                     startActivity(intent);
                 }
             });
