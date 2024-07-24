@@ -3,6 +3,7 @@ package com.example.dogardairy.Screens;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -57,6 +58,9 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MonthlySupplyActivity extends AppCompatActivity {
 
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
+    static String UID = "";
     ListView listView;
     LinearLayout loader, notifyBar, notfoundContainer;
     EditText searchInput;
@@ -78,6 +82,12 @@ public class MonthlySupplyActivity extends AppCompatActivity {
         setContentView(R.layout.activity_monthly_supply);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        sharedPreferences = getSharedPreferences("myData",MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+
+        if(!sharedPreferences.getString("UID","").equals("")){
+            UID = sharedPreferences.getString("UID","").toString();
+        }
 
         listView = findViewById(R.id.listView);
         notifyBar = findViewById(R.id.notifyBar);
@@ -138,22 +148,50 @@ public class MonthlySupplyActivity extends AppCompatActivity {
                     datalist.clear();
                     for (DataSnapshot ds: snapshot.getChildren()){
                         if(data.equals("")){
-                            MonthlyModel model = new MonthlyModel(ds.getKey(),
-                                    ds.child("name").getValue().toString(),
-                                    ds.child("contact").getValue().toString(),
-                                    ds.child("balance").getValue().toString(),
-                                    ds.child("MonthlyDetail").getValue().toString()
-                            );
-                            datalist.add(model);
-                        } else {
-                            if(ds.child("name").getValue().toString().trim().toLowerCase().contains(data.toLowerCase().trim())){
+                            if(DashboardActivity.getRole().equals("admin")){
                                 MonthlyModel model = new MonthlyModel(ds.getKey(),
                                         ds.child("name").getValue().toString(),
                                         ds.child("contact").getValue().toString(),
                                         ds.child("balance").getValue().toString(),
+                                        ds.child("userId").getValue().toString(),
                                         ds.child("MonthlyDetail").getValue().toString()
                                 );
                                 datalist.add(model);
+                            } else {
+                                if(UID.equals(ds.child("userId").getValue().toString())){
+                                    MonthlyModel model = new MonthlyModel(ds.getKey(),
+                                            ds.child("name").getValue().toString(),
+                                            ds.child("contact").getValue().toString(),
+                                            ds.child("balance").getValue().toString(),
+                                            ds.child("userId").getValue().toString(),
+                                            ds.child("MonthlyDetail").getValue().toString()
+                                    );
+                                    datalist.add(model);
+                                }
+                            }
+                        } else {
+                            if(ds.child("name").getValue().toString().trim().toLowerCase().contains(data.toLowerCase().trim())){
+                                if(DashboardActivity.getRole().equals("admin")){
+                                    MonthlyModel model = new MonthlyModel(ds.getKey(),
+                                            ds.child("name").getValue().toString(),
+                                            ds.child("contact").getValue().toString(),
+                                            ds.child("balance").getValue().toString(),
+                                            ds.child("userId").getValue().toString(),
+                                            ds.child("MonthlyDetail").getValue().toString()
+                                    );
+                                    datalist.add(model);
+                                } else {
+                                    if(UID.equals(ds.child("userId").getValue().toString())){
+                                        MonthlyModel model = new MonthlyModel(ds.getKey(),
+                                                ds.child("name").getValue().toString(),
+                                                ds.child("contact").getValue().toString(),
+                                                ds.child("balance").getValue().toString(),
+                                                ds.child("userId").getValue().toString(),
+                                                ds.child("MonthlyDetail").getValue().toString()
+                                        );
+                                        datalist.add(model);
+                                    }
+                                }
                             }
                         }
 
@@ -166,7 +204,9 @@ public class MonthlySupplyActivity extends AppCompatActivity {
                         MyAdapter adapter = new MyAdapter(MonthlySupplyActivity.this,datalist);
                         listView.setAdapter(adapter);
                     } else {
+                        loader.setVisibility(View.GONE);
                         listView.setVisibility(View.GONE);
+                        notfoundContainer.setVisibility(View.VISIBLE);
                         if(!data.equals("")){
                             notfoundContainer.setVisibility(View.VISIBLE);
                         }
@@ -338,6 +378,7 @@ public class MonthlySupplyActivity extends AppCompatActivity {
                 mydata.put("name", nameInput.getText().toString().trim());
                 mydata.put("contact", contactInput.getText().toString().trim());
                 mydata.put("balance", "0");
+                mydata.put("userId", UID);
                 mydata.put("MonthlyDetail", "");
                 MainActivity.db.child("Monthly").push().setValue(mydata);
                 message.setText("Person Added Successfully!!!");
@@ -404,18 +445,28 @@ public class MonthlySupplyActivity extends AppCompatActivity {
         public View getView(int i, View convertView, ViewGroup parent) {
             View customListItem = LayoutInflater.from(context).inflate(R.layout.persons_custom_listview,null);
             LinearLayout listItem;
-            TextView sno, name;
+            TextView sno, name, userName, userRole;
             CircleImageView image;
             ImageView menu;
 
             listItem = customListItem.findViewById(R.id.listItem);
             sno = customListItem.findViewById(R.id.sno);
             name = customListItem.findViewById(R.id.name);
+            userName = customListItem.findViewById(R.id.userName);
+            userRole = customListItem.findViewById(R.id.userRole);
             image = customListItem.findViewById(R.id.image);
             menu = customListItem.findViewById(R.id.menu);
 
             sno.setText(""+(i+1));
             name.setText(data.get(i).getName());
+
+            if(DashboardActivity.getRole().equals("admin")){
+                userName.setVisibility(View.VISIBLE);
+                userRole.setVisibility(View.VISIBLE);
+            } else {
+                userName.setVisibility(View.GONE);
+                userRole.setVisibility(View.GONE);
+            }
 
             listItem.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -474,29 +525,27 @@ public class MonthlySupplyActivity extends AppCompatActivity {
                             yesBtn.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    if(MainActivity.connectionCheck(context)){
-                                        MainActivity.db.child("Monthly").child(data.get(i).getId()).removeValue();
-                                        Dialog dialog = new Dialog(context);
-                                        dialog.setContentView(R.layout.dialog_success);
-                                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                                        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                                        dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-                                        dialog.getWindow().setGravity(Gravity.CENTER);
-                                        dialog.setCanceledOnTouchOutside(false);
-                                        dialog.setCancelable(false);
-                                        TextView msg = dialog.findViewById(R.id.msgDialog);
-                                        msg.setText("Deleted Successfully!!!");
-                                        dialog.show();
+                                    MainActivity.db.child("Monthly").child(data.get(i).getId()).removeValue();
+                                    Dialog dialog = new Dialog(context);
+                                    dialog.setContentView(R.layout.dialog_success);
+                                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                    dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                                    dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                                    dialog.getWindow().setGravity(Gravity.CENTER);
+                                    dialog.setCanceledOnTouchOutside(false);
+                                    dialog.setCancelable(false);
+                                    TextView msg = dialog.findViewById(R.id.msgDialog);
+                                    msg.setText("Deleted Successfully!!!");
+                                    dialog.show();
 
-                                        new Handler().postDelayed(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                dialog.dismiss();
-                                                actiondialog.dismiss();
-                                                loaddialog.dismiss();
-                                            }
-                                        },3000);
-                                    }
+                                    new Handler().postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            dialog.dismiss();
+                                            actiondialog.dismiss();
+                                            loaddialog.dismiss();
+                                        }
+                                    },3000);
                                 }
                             });
 
@@ -505,6 +554,21 @@ public class MonthlySupplyActivity extends AppCompatActivity {
                     });
 
                     loaddialog.show();
+                }
+            });
+
+            MainActivity.db.child("Users").child(data.get(i).getUserId()).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.exists()){
+                        userName.setText(snapshot.child("name").getValue().toString());
+                        userRole.setText(snapshot.child("role").getValue().toString());
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
                 }
             });
 

@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -30,6 +31,7 @@ public class UserProfileActivity extends AppCompatActivity {
     TextView nameText, emailText, createdOnText, roleText;
     static String UID = "";
     Button activateBtn, deactivateBtn;
+    ImageView profileImage;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +51,7 @@ public class UserProfileActivity extends AppCompatActivity {
         roleText = findViewById(R.id.roleText);
         activateBtn = findViewById(R.id.activateBtn);
         deactivateBtn = findViewById(R.id.deactivateBtn);
+        profileImage = findViewById(R.id.profileImage);
 
         fetchDetails();
 
@@ -121,6 +124,9 @@ public class UserProfileActivity extends AppCompatActivity {
                     emailText.setText(snapshot.child("email").getValue().toString().trim());
                     createdOnText.setText(snapshot.child("created_on").getValue().toString().trim());
                     roleText.setText(snapshot.child("role").getValue().toString().trim());
+                    if(!snapshot.child("image").getValue().toString().equals("")){
+                        profileImage.setImageResource(Integer.parseInt(snapshot.child("image").getValue().toString()));
+                    }
                     String status = snapshot.child("status").getValue().toString().trim();
                     if (status.equals("1")) {
                         deactivateBtn.setVisibility(View.VISIBLE);

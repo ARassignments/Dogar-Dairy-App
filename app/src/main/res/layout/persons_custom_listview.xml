@@ -43,13 +43,28 @@
                 android:text="Name"
                 style="@style/authTitle"/>
 
-            <TextView
-                android:id="@+id/status"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Status"
-                android:visibility="gone"
-                style="@style/authLabel"/>
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/userName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="User Name"
+                    android:layout_weight="1"
+                    android:visibility="visible"
+                    style="@style/authLabel"/>
+
+                <TextView
+                    android:id="@+id/userRole"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="User Role"
+                    android:visibility="visible"
+                    style="@style/searchLabelText"/>
+
+            </LinearLayout>
 
         </LinearLayout>
 

@@ -68,6 +68,7 @@
                     android:layout_height="match_parent">
 
                     <ImageView
+                        android:id="@+id/profileImage"
                         android:layout_width="160dp"
                         android:layout_height="160dp"
                         android:src="@drawable/boy_14"/>

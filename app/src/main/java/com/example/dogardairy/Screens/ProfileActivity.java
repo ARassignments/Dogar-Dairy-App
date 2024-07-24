@@ -12,19 +12,26 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.dogardairy.MainActivity;
 import com.example.dogardairy.R;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,10 +39,33 @@ public class ProfileActivity extends AppCompatActivity {
 
     EditText nameInput;
     TextView emailText, createdOnText, roleText, saveBtn;
-    ImageView editImageBtn;
+    ImageView editImageBtn, profileImage;
     static String UID = "";
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
+    int[] images = {
+            R.drawable.boy_1,
+            R.drawable.boy_2,
+            R.drawable.boy_3,
+            R.drawable.boy_4,
+            R.drawable.boy_5,
+            R.drawable.boy_6,
+            R.drawable.boy_7,
+            R.drawable.boy_8,
+            R.drawable.boy_9,
+            R.drawable.boy_10,
+            R.drawable.boy_11,
+            R.drawable.boy_12,
+            R.drawable.boy_13,
+            R.drawable.boy_14,
+            R.drawable.boy_15,
+            R.drawable.boy_16,
+            R.drawable.boy_17,
+            R.drawable.boy_18
+    };
+
+    Dialog dialogImage;
+    CardView boy_1, boy_2;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +80,7 @@ public class ProfileActivity extends AppCompatActivity {
         roleText = findViewById(R.id.roleText);
         saveBtn = findViewById(R.id.saveBtn);
         editImageBtn = findViewById(R.id.editImageBtn);
+        profileImage = findViewById(R.id.profileImage);
 
         nameInput.setText(DashboardActivity.getName());
         emailText.setText(DashboardActivity.getEmail());
@@ -61,6 +92,21 @@ public class ProfileActivity extends AppCompatActivity {
 
         if(!sharedPreferences.getString("UID","").equals("")){
             UID = sharedPreferences.getString("UID","").toString();
+            MainActivity.db.child("Users").child(UID).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.exists()){
+                        if(!snapshot.child("image").getValue().toString().equals("")){
+                            profileImage.setImageResource(Integer.parseInt(snapshot.child("image").getValue().toString()));
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
         }
 
         nameInput.addTextChangedListener(new TextWatcher() {
@@ -93,6 +139,47 @@ public class ProfileActivity extends AppCompatActivity {
                 validation();
             }
         });
+
+        editImageBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialogImage = new Dialog(ProfileActivity.this);
+                dialogImage.setContentView(R.layout.dialog_bottom_profile_image);
+                dialogImage.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                dialogImage.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                dialogImage.getWindow().getAttributes().windowAnimations = R.style.DialogAnimationBottom;
+                dialogImage.getWindow().setGravity(Gravity.BOTTOM);
+                dialogImage.setCanceledOnTouchOutside(false);
+                dialogImage.setCancelable(false);
+                Button cancelBtn;
+                cancelBtn = dialogImage.findViewById(R.id.cancelBtn);
+                boy_1 = dialogImage.findViewById(R.id.boy_1);
+                boy_2 = dialogImage.findViewById(R.id.boy_2);
+                dialogImage.show();
+
+                boy_1.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        setProfileImage(0);
+                    }
+                });
+
+                boy_2.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        setProfileImage(1);
+                    }
+                });
+
+                cancelBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialogImage.dismiss();
+                    }
+                });
+            }
+        });
+
     }
 
     public boolean nameValidation(){
@@ -152,4 +239,11 @@ public class ProfileActivity extends AppCompatActivity {
             },4000);
         }
     }
+
+    public void setProfileImage(int value){
+        profileImage.setImageResource(images[value]);
+        dialogImage.dismiss();
+        MainActivity.db.child("Users").child(UID).child("image").setValue(""+images[value]);
+    }
+
 }

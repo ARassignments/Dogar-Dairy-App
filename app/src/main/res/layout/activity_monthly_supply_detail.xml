@@ -22,10 +22,11 @@
             style="@style/appBarIcon"/>
 
         <TextView
+            android:id="@+id/appBarTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Monthly Supply"
-            android:layout_marginLeft="10dp"
+            android:layout_marginHorizontal="10dp"
             android:layout_marginTop="2dp"
             android:layout_weight="1"
             android:textAlignment="textStart"
@@ -39,6 +40,14 @@
             android:textAlignment="textEnd"
             style="@style/appBarText"/>
 
+        <ImageView
+            android:id="@+id/callBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/call"
+            android:layout_marginStart="10dp"
+            style="@style/appBarIcon"/>
+
     </LinearLayout>
 
     <LinearLayout
@@ -50,7 +59,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:layout_marginHorizontal="30dp">
+        android:layout_marginHorizontal="30dp"
+        android:gravity="center">
 
         <TextView
             android:layout_width="wrap_content"
@@ -78,6 +88,13 @@
             android:layout_weight="1"
             android:textAlignment="center"
             style="@style/authTitle"/>
+
+        <ImageView
+            android:id="@+id/sortBtn"
+            android:layout_width="22dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/deasscending_order"
+            style="@style/appBarIcon" />
 
     </LinearLayout>
 
@@ -120,6 +137,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:layout_marginTop="16dp"
         android:divider="@null"
         android:dividerHeight="0dp"
         android:visibility="visible"
@@ -242,10 +260,18 @@
 
         </FrameLayout>
 
+        <ImageView
+            android:id="@+id/fullListBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/list"
+            android:layout_marginStart="8dp"
+            style="@style/appBarIcon"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Balanced Amount:"
+            android:text="Balance:"
             android:layout_marginHorizontal="8dp"
             android:layout_weight="1"
             android:textAlignment="textEnd"

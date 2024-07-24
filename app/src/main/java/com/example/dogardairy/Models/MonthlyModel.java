@@ -1,18 +1,19 @@
 package com.example.dogardairy.Models;
 
 public class MonthlyModel {
-    String id, name , contact, balance, MonthlyDetail;
+    String id, name , contact, balance, userId, MonthlyDetail;
 
     public MonthlyModel(){
 
     }
 
-    public MonthlyModel(String id, String name, String contact, String balance, String MonthlyDetail) {
+    public MonthlyModel(String id, String name, String contact, String balance, String userId, String monthlyDetail) {
         this.id = id;
         this.name = name;
         this.contact = contact;
         this.balance = balance;
-        this.MonthlyDetail = MonthlyDetail;
+        this.userId = userId;
+        MonthlyDetail = monthlyDetail;
     }
 
     public String getMonthlyDetail() {
@@ -53,5 +54,13 @@ public class MonthlyModel {
 
     public void setBalance(String balance) {
         this.balance = balance;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

@@ -92,8 +92,6 @@
 
         </LinearLayout>
 
-
-
         <ImageView
             android:id="@+id/delete"
             android:layout_width="wrap_content"

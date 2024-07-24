@@ -48,6 +48,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.DateFormat;
+import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -64,11 +65,12 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
     static String UID = "";
-    String MonthlyId, currentDate, contact, personName;
+    static String sortingStatus = "dsc";
+    String MonthlyId, currentDate, contact, personName, currentMonth;
     ListView listView;
     LinearLayout notfoundContainer;
-    TextView totalQty, grandTotalAmount, balancedAmount, date;
-    ImageView sendMessageBtn;
+    TextView totalQty, grandTotalAmount, balancedAmount, date, appBarTitle;
+    ImageView sendMessageBtn, sortBtn, callBtn, fullListBtn;
     FrameLayout sendWhatsappMessageBtn;
     Button addQuantityBtn, unpaidBtn;
     ArrayList<MonthlyDetailModel> datalist = new ArrayList<>();
@@ -76,7 +78,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
 
     //    Dialog Elements
     Dialog addQtyDialog, unpaidDialog, itemsDialog;
-    TextView dateView, totalAmountUnpaid, balanceAmountUnpaid;
+    TextView dateView, totalAmountUnpaid, balanceAmountUnpaid, totalAmountDialog;
     TextInputEditText qtyInput, amountInput, itemNameInput, itemAmountInput, givenAmountInput;
     TextInputLayout qtyLayout, amountLayout, itemNameLayout, itemAmountLayout, givenAmountLayout;
 
@@ -100,6 +102,10 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         sendWhatsappMessageBtn = findViewById(R.id.sendWhatsappMessageBtn);
         addQuantityBtn = findViewById(R.id.addQuantityBtn);
         unpaidBtn = findViewById(R.id.unpaidBtn);
+        appBarTitle = findViewById(R.id.appBarTitle);
+        sortBtn = findViewById(R.id.sortBtn);
+        callBtn = findViewById(R.id.callBtn);
+        fullListBtn = findViewById(R.id.fullListBtn);
 
         if(!sharedPreferences.getString("UID","").equals("")){
             UID = sharedPreferences.getString("UID","").toString();
@@ -109,6 +115,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("M/yyyy");
         currentDate = simpleDateFormat.format(calendar.getTime());
+        currentMonth = new SimpleDateFormat("MMMM, yyyy").format(calendar.getTime());
         date.setText(currentDate);
         //date picker end
 
@@ -118,6 +125,8 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             contact = extras.getString("contact");
             personName = extras.getString("personName");
         }
+
+        appBarTitle.setText(personName);
 
         MainActivity.db.child("Monthly").child(MonthlyId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -142,21 +151,46 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                     balance = "0";
                 }
 
+                if(sortingStatus.equals("dsc")){
+                    Collections.reverse(datalist);
+                }
+
                 String txt = "                ATTARI DAIRY \n" +
                         "***** Monthly Milk Report ***** \n" +
+                        "Month: " +currentMonth+"\n"+
                         "Name: "+personName+"\n" +
+                        "_____________________________________\n\n";
+
+                for(int i=0;i<datalist.size();i++){
+                    if(datalist.get(i).getItemName().equals("")){
+                        int total = Integer.parseInt(datalist.get(i).getQty())*Integer.parseInt(datalist.get(i).getAmount());
+                        txt += "     "+(i+1)+".  "+datalist.get(i).getDate()+"    "+datalist.get(i).getQty()+"kg     Rs "+total+"/- \n";
+                    } else {
+                        int total = Integer.parseInt(datalist.get(i).getQty())*Integer.parseInt(datalist.get(i).getAmount());
+                        txt += "     "+(i+1)+".  "+datalist.get(i).getDate()+"    "+datalist.get(i).getQty()+"kg     Rs "+total+"/- \n" +
+                                "          -----------------------------------------------------\n" +
+                                "    ↳   Item:     "+datalist.get(i).getItemName()+"    Rs "+datalist.get(i).getItemAmount()+"/- \n" +
+                                "          -----------------------------------------------------\n";
+                    }
+                }
+
+                txt += "_____________________________________\n\n" +
                         "Milk Rate is: Rs "+DashboardActivity.getMilkRate()+"/- \n" +
                         "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
                         "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
                         "Your pending Balance: Rs "+balance+"/-\n" +
                         " ----- JazakAllah -----";
 
-                PackageManager packageManager = getPackageManager();
-                try {
-                    packageManager.getPackageInfo("com.whatsapp",PackageManager.GET_ACTIVITIES);
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://api.whatsapp.com/send?phone="+contact+"&text="+txt));
-                    startActivity(intent);
-                } catch (PackageManager.NameNotFoundException e){
+//                String txt = "                ATTARI DAIRY \n" +
+//                        "***** Monthly Milk Report ***** \n" +
+//                        "Name: "+personName+"\n" +
+//                        "Milk Rate is: Rs "+DashboardActivity.getMilkRate()+"/- \n" +
+//                        "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
+//                        "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
+//                        "Your pending Balance: Rs "+balance+"/-\n" +
+//                        " ----- JazakAllah -----";
+
+                if(datalist.size() == 0){
                     Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
                     alertdialog.setContentView(R.layout.dialog_error);
                     alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -166,7 +200,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                     alertdialog.setCancelable(false);
                     alertdialog.setCanceledOnTouchOutside(false);
                     TextView message = alertdialog.findViewById(R.id.msgDialog);
-                    message.setText("Something went wrong, message not sended!!!");
+                    message.setText("Message not sended because no data found!!!");
                     alertdialog.show();
                     new Handler().postDelayed(new Runnable() {
                         @Override
@@ -174,6 +208,31 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                             alertdialog.dismiss();
                         }
                     },3000);
+                } else {
+                    PackageManager packageManager = getPackageManager();
+                    try {
+                        packageManager.getPackageInfo("com.whatsapp",PackageManager.GET_ACTIVITIES);
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://api.whatsapp.com/send?phone="+contact+"&text="+txt));
+                        startActivity(intent);
+                    } catch (PackageManager.NameNotFoundException e){
+                        Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
+                        alertdialog.setContentView(R.layout.dialog_error);
+                        alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                        alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                        alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                        alertdialog.getWindow().setGravity(Gravity.CENTER);
+                        alertdialog.setCancelable(false);
+                        alertdialog.setCanceledOnTouchOutside(false);
+                        TextView message = alertdialog.findViewById(R.id.msgDialog);
+                        message.setText("Something went wrong, message not sended!!!");
+                        alertdialog.show();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                alertdialog.dismiss();
+                            }
+                        },3000);
+                    }
                 }
             }
         });
@@ -187,37 +246,37 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                     balance = "0";
                 }
 
+                if(sortingStatus.equals("dsc")){
+                    Collections.reverse(datalist);
+                }
+
                 String txt = "                ATTARI DAIRY \n" +
                         "***** Monthly Milk Report ***** \n" +
+                        "Month: " +currentMonth+"\n"+
                         "Name: "+personName+"\n" +
+                        "_____________________________________\n\n";
+
+                for(int i=0;i<datalist.size();i++){
+                    if(datalist.get(i).getItemName().equals("")){
+                        int total = Integer.parseInt(datalist.get(i).getQty())*Integer.parseInt(datalist.get(i).getAmount());
+                        txt += "     "+(i+1)+".  "+datalist.get(i).getDate()+"    "+datalist.get(i).getQty()+"kg     Rs "+total+"/- \n";
+                    } else {
+                        int total = Integer.parseInt(datalist.get(i).getQty())*Integer.parseInt(datalist.get(i).getAmount());
+                        txt += "     "+(i+1)+".  "+datalist.get(i).getDate()+"    "+datalist.get(i).getQty()+"kg     Rs "+total+"/- \n" +
+                                "          -----------------------------------------------------\n" +
+                                "    ↳   Item:     "+datalist.get(i).getItemName()+"    Rs "+datalist.get(i).getItemAmount()+"/- \n" +
+                                "          -----------------------------------------------------\n";
+                    }
+                }
+
+                txt += "_____________________________________\n\n" +
                         "Milk Rate is: Rs "+DashboardActivity.getMilkRate()+"/- \n" +
                         "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
                         "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
                         "Your pending Balance: Rs "+balance+"/-\n" +
                         " ----- JazakAllah -----";
 
-                try {
-                    ArrayList<String> parts = MainActivity.mySmsManager.divideMessage(txt);
-                    MainActivity.mySmsManager.sendMultipartTextMessage( ""+contact,null, parts,null,null);
-                    Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
-                    alertdialog.setContentView(R.layout.dialog_success);
-                    alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-                    alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                    alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-                    alertdialog.getWindow().setGravity(Gravity.CENTER);
-                    alertdialog.setCancelable(false);
-                    alertdialog.setCanceledOnTouchOutside(false);
-                    TextView message = alertdialog.findViewById(R.id.msgDialog);
-                    message.setText("Message Sended Successfully!!!");
-                    alertdialog.show();
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            alertdialog.dismiss();
-                        }
-                    },3000);
-                }
-                catch (Exception exception){
+                if(datalist.size() == 0){
                     Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
                     alertdialog.setContentView(R.layout.dialog_error);
                     alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -227,7 +286,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                     alertdialog.setCancelable(false);
                     alertdialog.setCanceledOnTouchOutside(false);
                     TextView message = alertdialog.findViewById(R.id.msgDialog);
-                    message.setText("Something went wrong, message not sended!!!");
+                    message.setText("Message not sended because no data found!!!");
                     alertdialog.show();
                     new Handler().postDelayed(new Runnable() {
                         @Override
@@ -235,7 +294,47 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                             alertdialog.dismiss();
                         }
                     },3000);
-                    Log.d("Message", "onClick: "+exception.getMessage());
+                } else {
+                    try {
+                        ArrayList<String> parts = MainActivity.mySmsManager.divideMessage(txt);
+                        MainActivity.mySmsManager.sendMultipartTextMessage( ""+contact,null, parts,null,null);
+                        Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
+                        alertdialog.setContentView(R.layout.dialog_success);
+                        alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                        alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                        alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                        alertdialog.getWindow().setGravity(Gravity.CENTER);
+                        alertdialog.setCancelable(false);
+                        alertdialog.setCanceledOnTouchOutside(false);
+                        TextView message = alertdialog.findViewById(R.id.msgDialog);
+                        message.setText("Message Sended Successfully!!!");
+                        alertdialog.show();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                alertdialog.dismiss();
+                            }
+                        },3000);
+                    }
+                    catch (Exception exception){
+                        Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
+                        alertdialog.setContentView(R.layout.dialog_error);
+                        alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                        alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                        alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                        alertdialog.getWindow().setGravity(Gravity.CENTER);
+                        alertdialog.setCancelable(false);
+                        alertdialog.setCanceledOnTouchOutside(false);
+                        TextView message = alertdialog.findViewById(R.id.msgDialog);
+                        message.setText("Something went wrong, message not sended!!!");
+                        alertdialog.show();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                alertdialog.dismiss();
+                            }
+                        },3000);
+                    }
                 }
             }
         });
@@ -318,6 +417,40 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             }
         });
 
+        sortBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sorting();
+            }
+        });
+
+        callBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse("tel:" + contact));
+                startActivity(intent);
+            }
+        });
+
+        fullListBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        fetchData();
+    }
+
+    public void sorting(){
+        if(sortingStatus.equals("asc")){
+            sortingStatus = "dsc";
+            sortBtn.setImageResource(R.drawable.deasscending_order);
+        } else if(sortingStatus.equals("dsc")){
+            sortingStatus = "asc";
+            sortBtn.setImageResource(R.drawable.asscending_order);
+        }
         fetchData();
     }
 
@@ -348,7 +481,9 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                     if(datalist.size() > 0){
                         listView.setVisibility(View.VISIBLE);
                         notfoundContainer.setVisibility(View.GONE);
-                        Collections.reverse(datalist);
+                        if(sortingStatus.equals("dsc")){
+                            Collections.reverse(datalist);
+                        }
                         MyAdapter adapter = new MyAdapter(MonthlySupplyDetailActivity.this,datalist);
                         listView.setAdapter(adapter);
                         grandTotalAmount.setText(""+grandtotal);
@@ -392,6 +527,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String selectedDate = (datePicker.getMonth()+1)+"/"+datePicker.getYear();
                 date.setText(selectedDate);
+                currentMonth = new DateFormatSymbols().getMonths()[datePicker.getMonth()] +", "+datePicker.getYear();
                 fetchData();
                 alertdialog.dismiss();
             }
@@ -430,6 +566,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         amountInput = addQtyDialog.findViewById(R.id.amountInput);
         itemNameInput = addQtyDialog.findViewById(R.id.itemNameInput);
         itemAmountInput = addQtyDialog.findViewById(R.id.itemAmountInput);
+        totalAmountDialog = addQtyDialog.findViewById(R.id.totalAmountDialog);
 
         // current date picker
         Calendar calendar = Calendar.getInstance();
@@ -447,6 +584,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 qtyValidation();
+                totalAmountDialog();
             }
 
             @Override
@@ -464,6 +602,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 amountValidation();
+                totalAmountDialog();
             }
 
             @Override
@@ -481,6 +620,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 itemAmountValidation();
+                totalAmountDialog();
             }
 
             @Override
@@ -679,7 +819,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             itemAmount = Float.parseFloat(itemAmountInput.getText().toString().trim());
             total += itemAmount;
             HashMap<String, String> mydata = new HashMap<String, String>();
-            mydata.put("amount", amountInput.getText().toString().trim());
+            mydata.put("amount", ""+((Integer.parseInt(qtyInput.getText().toString().trim()))*(Integer.parseInt(amountInput.getText().toString().trim()))));
             mydata.put("qty", qtyInput.getText().toString().trim());
             mydata.put("date", dateView.getText().toString().trim());
             mydata.put("month", currentDate);
@@ -689,7 +829,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").push().setValue(mydata);
         } else {
             HashMap<String, String> mydata = new HashMap<String, String>();
-            mydata.put("amount", amountInput.getText().toString().trim());
+            mydata.put("amount", ""+((Integer.parseInt(qtyInput.getText().toString().trim()))*(Integer.parseInt(amountInput.getText().toString().trim()))));
             mydata.put("qty", qtyInput.getText().toString().trim());
             mydata.put("date", dateView.getText().toString().trim());
             mydata.put("month", currentDate);
@@ -782,6 +922,16 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
 
     }
 
+    public void totalAmountDialog(){
+        if(itemNameInput.getText().toString().trim().equals("")){
+            int total = Integer.parseInt("0"+qtyInput.getText().toString().trim())*Integer.parseInt("0"+amountInput.getText().toString().trim());
+            totalAmountDialog.setText("Rs "+total+"/-");
+        } else {
+            int total = Integer.parseInt("0"+qtyInput.getText().toString().trim())*Integer.parseInt("0"+amountInput.getText().toString().trim())+Integer.parseInt("0"+itemAmountInput.getText().toString().trim());
+            totalAmountDialog.setText("Rs "+total+"/-");
+        }
+    }
+
     class MyAdapter extends BaseAdapter {
 
         Context context;
@@ -825,7 +975,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             sno.setText(""+(i+1));
             date.setText(data.get(i).getDate());
             qty.setText(data.get(i).getQty()+"kg");
-            amount.setText("Rs "+data.get(i).getTotalAmount()+"/-");
+            amount.setText("Rs "+data.get(i).getAmount()+"/-");
             itemName.setText(data.get(i).getItemName());
             itemAmount.setText("Rs "+data.get(i).getItemAmount()+"/-");
 
@@ -858,55 +1008,51 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                     yesBtn.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            if(MainActivity.connectionCheck(context)){
-                                double totalAmount = Double.parseDouble(data.get(i).getTotalAmount());
-                                double balance = Double.parseDouble(balancedAmount.getText().toString().trim());
+                            double totalAmount = Double.parseDouble(data.get(i).getTotalAmount());
+                            double balance = Double.parseDouble(balancedAmount.getText().toString().trim());
 
-                                if(totalAmount<balance){
-                                    MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").child(data.get(i).getId()).removeValue();
-                                    MainActivity.db.child("Monthly").child(MonthlyId).child("balance").setValue(""+(balance-totalAmount));
-                                    balancedAmount.setText(""+(balance-totalAmount));
-                                    Dialog dialog = new Dialog(context);
-                                    dialog.setContentView(R.layout.dialog_success);
-                                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                                    dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                                    dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-                                    dialog.getWindow().setGravity(Gravity.CENTER);
-                                    dialog.setCanceledOnTouchOutside(false);
-                                    dialog.setCancelable(false);
-                                    TextView msg = dialog.findViewById(R.id.msgDialog);
-                                    msg.setText("Deleted Successfully!!!");
-                                    dialog.show();
+                            if(totalAmount<=balance){
+                                MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").child(data.get(i).getId()).removeValue();
+                                MainActivity.db.child("Monthly").child(MonthlyId).child("balance").setValue(""+(balance-totalAmount));
+                                balancedAmount.setText(""+(balance-totalAmount));
+                                Dialog dialog = new Dialog(context);
+                                dialog.setContentView(R.layout.dialog_success);
+                                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                                dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                                dialog.getWindow().setGravity(Gravity.CENTER);
+                                dialog.setCanceledOnTouchOutside(false);
+                                dialog.setCancelable(false);
+                                TextView msg = dialog.findViewById(R.id.msgDialog);
+                                msg.setText("Deleted Successfully!!!");
+                                dialog.show();
 
-                                    new Handler().postDelayed(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            dialog.dismiss();
-                                            actiondialog.dismiss();
-                                        }
-                                    },3000);
-                                } else {
-                                    Dialog dialog = new Dialog(context);
-                                    dialog.setContentView(R.layout.dialog_error);
-                                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                                    dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                                    dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-                                    dialog.getWindow().setGravity(Gravity.CENTER);
-                                    dialog.setCanceledOnTouchOutside(false);
-                                    dialog.setCancelable(false);
-                                    TextView msg = dialog.findViewById(R.id.msgDialog);
-                                    msg.setText("You can't delete because balance is low!!!");
-                                    dialog.show();
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        dialog.dismiss();
+                                        actiondialog.dismiss();
+                                    }
+                                },3000);
+                            } else {
+                                Dialog dialog = new Dialog(context);
+                                dialog.setContentView(R.layout.dialog_error);
+                                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                                dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                                dialog.getWindow().setGravity(Gravity.CENTER);
+                                dialog.setCanceledOnTouchOutside(false);
+                                dialog.setCancelable(false);
+                                TextView msg = dialog.findViewById(R.id.msgDialog);
+                                msg.setText("You can't delete because balance is low!!!");
+                                dialog.show();
 
-                                    new Handler().postDelayed(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            dialog.dismiss();
-                                        }
-                                    },3000);
-                                }
-
-
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        dialog.dismiss();
+                                    }
+                                },3000);
                             }
                         }
                     });
@@ -914,6 +1060,13 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                     actiondialog.show();
                 }
             });
+
+            // Set padding top to 0
+            if(i==0){
+                customListItem.setPadding(customListItem.getPaddingLeft(), 0,customListItem.getPaddingRight(), 0);
+            }
+            customListItem.setAlpha(0f);
+            customListItem.animate().alpha(1f).setDuration(500).setStartDelay(i * 2).start();
 
             return customListItem;
         }

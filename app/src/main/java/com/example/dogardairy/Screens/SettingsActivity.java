@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -23,6 +24,11 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.dogardairy.MainActivity;
 import com.example.dogardairy.R;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -32,6 +38,7 @@ public class SettingsActivity extends AppCompatActivity {
     static String UID = "";
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
+    CircleImageView profileImage;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,17 +50,33 @@ public class SettingsActivity extends AppCompatActivity {
         logoutBtn = findViewById(R.id.logoutBtn);
         adminOptions = findViewById(R.id.adminOptions);
         profileName = findViewById(R.id.profileName);
+        profileImage = findViewById(R.id.profileImage);
 
         sharedPreferences = getSharedPreferences("myData",MODE_PRIVATE);
         editor = sharedPreferences.edit();
 
         if(!sharedPreferences.getString("UID","").equals("")){
             UID = sharedPreferences.getString("UID","").toString();
+            MainActivity.db.child("Users").child(UID).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.exists()){
+                        profileName.setText(snapshot.child("name").getValue().toString());
+                        if(!snapshot.child("image").getValue().toString().equals("")){
+                            profileImage.setImageResource(Integer.parseInt(snapshot.child("image").getValue().toString()));
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
         }
 
 
         MainActivity.checkStatus(SettingsActivity.this, UID);
-        profileName.setText(DashboardActivity.getName());
         if(DashboardActivity.getRole().equals("admin")){
             adminOptions.setVisibility(View.VISIBLE);
         }

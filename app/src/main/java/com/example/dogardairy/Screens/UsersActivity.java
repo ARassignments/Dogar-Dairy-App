@@ -263,6 +263,10 @@ public class UsersActivity extends AppCompatActivity {
                 }
             });
 
+            if(!data.get(i).getImage().equals("")){
+                image.setImageResource(Integer.parseInt(data.get(i).getImage()));
+            }
+
             return customListItem;
         }
     }
