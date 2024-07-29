@@ -158,7 +158,9 @@ public class OtherItemsActivity extends AppCompatActivity {
                         MyAdapter adapter = new MyAdapter(OtherItemsActivity.this,datalist);
                         listView.setAdapter(adapter);
                     } else {
+                        loader.setVisibility(View.GONE);
                         listView.setVisibility(View.GONE);
+                        notfoundContainer.setVisibility(View.VISIBLE);
                         if(!data.equals("")){
                             notfoundContainer.setVisibility(View.VISIBLE);
                         }
@@ -270,8 +272,8 @@ public class OtherItemsActivity extends AppCompatActivity {
         if(input.equals("")){
             itemNameLayout.setError("Item Name is Required!!!");
             return false;
-        } else if(input.length() < 5){
-            itemNameLayout.setError("Item Name at least 5 Characters!!!");
+        } else if(input.length() < 3){
+            itemNameLayout.setError("Item Name at least 3 Characters!!!");
             return false;
         } else if(!matcher.matches()){
             itemNameLayout.setError("Only text allowed!!!");

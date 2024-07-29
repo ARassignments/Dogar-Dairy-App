@@ -19,3 +19,10 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keep class com.itextpdf.** { *; }
+-keep class com.itextpdf.kernel.** { *; }
+-keep class com.itextpdf.layout.** { *; }
+-keep class com.itextpdf.io.** { *; }
+-keep class com.itextpdf.font.** { *; }
+-keep class com.itextpdf.kernel.font.** { *; }

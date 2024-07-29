@@ -251,6 +251,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 HashMap<String,String> obj = new HashMap<String,String>();
                                 obj.put("name",nameInput.getText().toString().trim());
                                 obj.put("email",auth.getCurrentUser().getEmail());
+                                obj.put("pwd",pwdInput.getText().toString().trim());
                                 obj.put("image","");
                                 obj.put("role","user");
                                 obj.put("milkRate","0");

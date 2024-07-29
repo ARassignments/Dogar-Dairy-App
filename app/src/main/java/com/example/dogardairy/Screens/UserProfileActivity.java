@@ -28,7 +28,7 @@ import com.google.firebase.database.ValueEventListener;
 
 public class UserProfileActivity extends AppCompatActivity {
 
-    TextView nameText, emailText, createdOnText, roleText;
+    TextView nameText, emailText, createdOnText, roleText, pwdText;
     static String UID = "";
     Button activateBtn, deactivateBtn;
     ImageView profileImage;
@@ -49,6 +49,7 @@ public class UserProfileActivity extends AppCompatActivity {
         emailText = findViewById(R.id.emailText);
         createdOnText = findViewById(R.id.createdOnText);
         roleText = findViewById(R.id.roleText);
+        pwdText = findViewById(R.id.pwdText);
         activateBtn = findViewById(R.id.activateBtn);
         deactivateBtn = findViewById(R.id.deactivateBtn);
         profileImage = findViewById(R.id.profileImage);
@@ -124,6 +125,7 @@ public class UserProfileActivity extends AppCompatActivity {
                     emailText.setText(snapshot.child("email").getValue().toString().trim());
                     createdOnText.setText(snapshot.child("created_on").getValue().toString().trim());
                     roleText.setText(snapshot.child("role").getValue().toString().trim());
+                    pwdText.setText(snapshot.child("pwd").getValue().toString().trim());
                     if(!snapshot.child("image").getValue().toString().equals("")){
                         profileImage.setImageResource(Integer.parseInt(snapshot.child("image").getValue().toString()));
                     }

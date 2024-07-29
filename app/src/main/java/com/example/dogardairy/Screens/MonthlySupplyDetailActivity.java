@@ -1,15 +1,22 @@
 package com.example.dogardairy.Screens;
 
+import static com.itextpdf.io.font.FontProgramFactory.*;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.ParcelFileDescriptor;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -31,11 +38,15 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.dogardairy.MainActivity;
+import android.Manifest;
 import com.example.dogardairy.Models.ItemsModel;
 import com.example.dogardairy.Models.MonthlyDetailModel;
 import com.example.dogardairy.Models.MonthlyModel;
@@ -46,13 +57,41 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.itextpdf.io.font.FontProgramFactory;
+import com.itextpdf.io.font.PdfEncodings;
+import com.itextpdf.io.font.constants.StandardFonts;
+import com.itextpdf.kernel.colors.ColorConstants;
+import com.itextpdf.kernel.colors.DeviceRgb;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.borders.SolidBorder;
+import com.itextpdf.layout.element.AreaBreak;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.AreaBreakType;
+import com.itextpdf.layout.properties.BorderRadius;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
+import com.itextpdf.layout.properties.VerticalAlignment;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -66,7 +105,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
     SharedPreferences.Editor editor;
     static String UID = "";
     static String sortingStatus = "dsc";
-    String MonthlyId, currentDate, contact, personName, currentMonth;
+    String MonthlyId, currentDate, contact, personName, currentMonth, currentReportDate;
     ListView listView;
     LinearLayout notfoundContainer;
     TextView totalQty, grandTotalAmount, balancedAmount, date, appBarTitle;
@@ -74,10 +113,11 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
     FrameLayout sendWhatsappMessageBtn;
     Button addQuantityBtn, unpaidBtn;
     ArrayList<MonthlyDetailModel> datalist = new ArrayList<>();
+    ArrayList<MonthlyDetailModel> datalistReports = new ArrayList<>();
     ArrayList<ItemsModel> datalistItems = new ArrayList<>();
 
     //    Dialog Elements
-    Dialog addQtyDialog, unpaidDialog, itemsDialog;
+    Dialog addQtyDialog, unpaidDialog, itemsDialog, loaderDialog, reportDialog;
     TextView dateView, totalAmountUnpaid, balanceAmountUnpaid, totalAmountDialog;
     TextInputEditText qtyInput, amountInput, itemNameInput, itemAmountInput, givenAmountInput;
     TextInputLayout qtyLayout, amountLayout, itemNameLayout, itemAmountLayout, givenAmountLayout;
@@ -116,6 +156,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("M/yyyy");
         currentDate = simpleDateFormat.format(calendar.getTime());
         currentMonth = new SimpleDateFormat("MMMM, yyyy").format(calendar.getTime());
+        currentReportDate = new SimpleDateFormat("MMMM, yyyy").format(calendar.getTime());
         date.setText(currentDate);
         //date picker end
 
@@ -151,26 +192,20 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                     balance = "0";
                 }
 
-                if(sortingStatus.equals("dsc")){
-                    Collections.reverse(datalist);
-                }
-
                 String txt = "                ATTARI DAIRY \n" +
                         "***** Monthly Milk Report ***** \n" +
                         "Month: " +currentMonth+"\n"+
                         "Name: "+personName+"\n" +
                         "_____________________________________\n\n";
 
-                for(int i=0;i<datalist.size();i++){
-                    if(datalist.get(i).getItemName().equals("")){
-                        int total = Integer.parseInt(datalist.get(i).getQty())*Integer.parseInt(datalist.get(i).getAmount());
-                        txt += "     "+(i+1)+".  "+datalist.get(i).getDate()+"    "+datalist.get(i).getQty()+"kg     Rs "+total+"/- \n";
+                for(int i=0;i<datalistReports.size();i++){
+                    if(datalistReports.get(i).getItemName().equals("")){
+                        int total = Integer.parseInt(datalistReports.get(i).getQty())*Integer.parseInt(datalistReports.get(i).getAmount());
+                        txt += "     "+(i+1)+".  "+datalistReports.get(i).getDate()+"    "+datalistReports.get(i).getQty()+"kg     Rs "+total+"/- \n";
                     } else {
-                        int total = Integer.parseInt(datalist.get(i).getQty())*Integer.parseInt(datalist.get(i).getAmount());
-                        txt += "     "+(i+1)+".  "+datalist.get(i).getDate()+"    "+datalist.get(i).getQty()+"kg     Rs "+total+"/- \n" +
-                                "          -----------------------------------------------------\n" +
-                                "    ↳   Item:     "+datalist.get(i).getItemName()+"    Rs "+datalist.get(i).getItemAmount()+"/- \n" +
-                                "          -----------------------------------------------------\n";
+                        int total = Integer.parseInt(datalistReports.get(i).getQty())*Integer.parseInt(datalistReports.get(i).getAmount());
+                        txt += "     "+(i+1)+".  "+datalistReports.get(i).getDate()+"    "+datalistReports.get(i).getQty()+"kg     Rs "+total+"/- \n" +
+                                "    ↳   Item:     "+datalistReports.get(i).getItemName()+"    Rs "+datalistReports.get(i).getItemAmount()+"/- \n";
                     }
                 }
 
@@ -241,101 +276,107 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                String balance = balancedAmount.getText().toString().trim();
-                if(balancedAmount.getText().toString().trim().equals(grandTotalAmount.getText().toString().trim())){
-                    balance = "0";
-                }
+                    if (ContextCompat.checkSelfPermission(MonthlySupplyDetailActivity.this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED ||
+                            ContextCompat.checkSelfPermission(MonthlySupplyDetailActivity.this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
+                            ContextCompat.checkSelfPermission(MonthlySupplyDetailActivity.this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
 
-                if(sortingStatus.equals("dsc")){
-                    Collections.reverse(datalist);
-                }
-
-                String txt = "                ATTARI DAIRY \n" +
-                        "***** Monthly Milk Report ***** \n" +
-                        "Month: " +currentMonth+"\n"+
-                        "Name: "+personName+"\n" +
-                        "_____________________________________\n\n";
-
-                for(int i=0;i<datalist.size();i++){
-                    if(datalist.get(i).getItemName().equals("")){
-                        int total = Integer.parseInt(datalist.get(i).getQty())*Integer.parseInt(datalist.get(i).getAmount());
-                        txt += "     "+(i+1)+".  "+datalist.get(i).getDate()+"    "+datalist.get(i).getQty()+"kg     Rs "+total+"/- \n";
+                        // If any permission is not granted, request them
+                        ActivityCompat.requestPermissions(MonthlySupplyDetailActivity.this, new String[]{
+                                Manifest.permission.SEND_SMS,
+                                Manifest.permission.RECEIVE_SMS,
+                                Manifest.permission.READ_SMS
+                        }, 123);
                     } else {
-                        int total = Integer.parseInt(datalist.get(i).getQty())*Integer.parseInt(datalist.get(i).getAmount());
-                        txt += "     "+(i+1)+".  "+datalist.get(i).getDate()+"    "+datalist.get(i).getQty()+"kg     Rs "+total+"/- \n" +
-                                "          -----------------------------------------------------\n" +
-                                "    ↳   Item:     "+datalist.get(i).getItemName()+"    Rs "+datalist.get(i).getItemAmount()+"/- \n" +
-                                "          -----------------------------------------------------\n";
-                    }
-                }
-
-                txt += "_____________________________________\n\n" +
-                        "Milk Rate is: Rs "+DashboardActivity.getMilkRate()+"/- \n" +
-                        "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
-                        "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
-                        "Your pending Balance: Rs "+balance+"/-\n" +
-                        " ----- JazakAllah -----";
-
-                if(datalist.size() == 0){
-                    Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
-                    alertdialog.setContentView(R.layout.dialog_error);
-                    alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-                    alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                    alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-                    alertdialog.getWindow().setGravity(Gravity.CENTER);
-                    alertdialog.setCancelable(false);
-                    alertdialog.setCanceledOnTouchOutside(false);
-                    TextView message = alertdialog.findViewById(R.id.msgDialog);
-                    message.setText("Message not sended because no data found!!!");
-                    alertdialog.show();
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            alertdialog.dismiss();
+                        String balance = balancedAmount.getText().toString().trim();
+                        if(balancedAmount.getText().toString().trim().equals(grandTotalAmount.getText().toString().trim())){
+                            balance = "0";
                         }
-                    },3000);
-                } else {
-                    try {
-                        ArrayList<String> parts = MainActivity.mySmsManager.divideMessage(txt);
-                        MainActivity.mySmsManager.sendMultipartTextMessage( ""+contact,null, parts,null,null);
-                        Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
-                        alertdialog.setContentView(R.layout.dialog_success);
-                        alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-                        alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                        alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-                        alertdialog.getWindow().setGravity(Gravity.CENTER);
-                        alertdialog.setCancelable(false);
-                        alertdialog.setCanceledOnTouchOutside(false);
-                        TextView message = alertdialog.findViewById(R.id.msgDialog);
-                        message.setText("Message Sended Successfully!!!");
-                        alertdialog.show();
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                alertdialog.dismiss();
+
+                        String txt = "                ATTARI DAIRY \n" +
+                                "***** Monthly Milk Report ***** \n" +
+                                "Month: " +currentMonth+"\n"+
+                                "Name: "+personName+"\n" +
+                                "_____________________________________\n\n";
+
+                        for(int i=0;i<datalistReports.size();i++){
+                            if(datalistReports.get(i).getItemName().equals("")){
+                                int total = Integer.parseInt(datalistReports.get(i).getQty())*Integer.parseInt(datalistReports.get(i).getAmount());
+                                txt += "     "+(i+1)+".  "+datalistReports.get(i).getDate()+"    "+datalistReports.get(i).getQty()+"kg     Rs "+total+"/- \n";
+                            } else {
+                                int total = Integer.parseInt(datalistReports.get(i).getQty())*Integer.parseInt(datalistReports.get(i).getAmount());
+                                txt += "     "+(i+1)+".  "+datalistReports.get(i).getDate()+"    "+datalistReports.get(i).getQty()+"kg     Rs "+total+"/- \n" +
+                                        "    ↳   Item:     "+datalistReports.get(i).getItemName()+"    Rs "+datalistReports.get(i).getItemAmount()+"/- \n";
                             }
-                        },3000);
-                    }
-                    catch (Exception exception){
-                        Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
-                        alertdialog.setContentView(R.layout.dialog_error);
-                        alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-                        alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                        alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-                        alertdialog.getWindow().setGravity(Gravity.CENTER);
-                        alertdialog.setCancelable(false);
-                        alertdialog.setCanceledOnTouchOutside(false);
-                        TextView message = alertdialog.findViewById(R.id.msgDialog);
-                        message.setText("Something went wrong, message not sended!!!");
-                        alertdialog.show();
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                alertdialog.dismiss();
+                        }
+
+                        txt += "_____________________________________\n\n" +
+                                "Milk Rate is: Rs "+DashboardActivity.getMilkRate()+"/- \n" +
+                                "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
+                                "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
+                                "Your pending Balance: Rs "+balance+"/-\n" +
+                                " ----- JazakAllah -----";
+
+                        if(datalist.size() == 0){
+                            Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
+                            alertdialog.setContentView(R.layout.dialog_error);
+                            alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                            alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                            alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                            alertdialog.getWindow().setGravity(Gravity.CENTER);
+                            alertdialog.setCancelable(false);
+                            alertdialog.setCanceledOnTouchOutside(false);
+                            TextView message = alertdialog.findViewById(R.id.msgDialog);
+                            message.setText("Message not sended because no data found!!!");
+                            alertdialog.show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    alertdialog.dismiss();
+                                }
+                            },3000);
+                        } else {
+                            try {
+                                ArrayList<String> parts = MainActivity.mySmsManager.divideMessage(txt);
+                                MainActivity.mySmsManager.sendMultipartTextMessage( ""+contact,null, parts,null,null);
+                                Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
+                                alertdialog.setContentView(R.layout.dialog_success);
+                                alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                                alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                                alertdialog.getWindow().setGravity(Gravity.CENTER);
+                                alertdialog.setCancelable(false);
+                                alertdialog.setCanceledOnTouchOutside(false);
+                                TextView message = alertdialog.findViewById(R.id.msgDialog);
+                                message.setText("Message Sended Successfully!!!");
+                                alertdialog.show();
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        alertdialog.dismiss();
+                                    }
+                                },3000);
                             }
-                        },3000);
+                            catch (Exception exception){
+                                Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
+                                alertdialog.setContentView(R.layout.dialog_error);
+                                alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                                alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                                alertdialog.getWindow().setGravity(Gravity.CENTER);
+                                alertdialog.setCancelable(false);
+                                alertdialog.setCanceledOnTouchOutside(false);
+                                TextView message = alertdialog.findViewById(R.id.msgDialog);
+                                message.setText("Something went wrong, message not sended!!!");
+                                alertdialog.show();
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        alertdialog.dismiss();
+                                    }
+                                },3000);
+                            }
+                        }
                     }
-                }
             }
         });
 
@@ -437,6 +478,56 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                if(datalist.size() == 0){
+                    Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
+                    alertdialog.setContentView(R.layout.dialog_error);
+                    alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                    alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                    alertdialog.getWindow().setGravity(Gravity.CENTER);
+                    alertdialog.setCancelable(false);
+                    alertdialog.setCanceledOnTouchOutside(false);
+                    TextView message = alertdialog.findViewById(R.id.msgDialog);
+                    message.setText("PDF not generated because no data found!!!");
+                    alertdialog.show();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            alertdialog.dismiss();
+                        }
+                    },3000);
+                } else {
+                    reportDialog = new Dialog(MonthlySupplyDetailActivity.this);
+                    reportDialog.setContentView(R.layout.dialog_pdf_report);
+                    reportDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                    reportDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    reportDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                    reportDialog.getWindow().setGravity(Gravity.CENTER);
+                    reportDialog.setCancelable(false);
+                    reportDialog.setCanceledOnTouchOutside(false);
+                    Button cancelBtn, shareBtn;
+                    ImageView imageView;
+                    cancelBtn = reportDialog.findViewById(R.id.cancelBtn);
+                    shareBtn = reportDialog.findViewById(R.id.shareBtn);
+                    imageView = reportDialog.findViewById(R.id.imageView);
+
+                    showPdfPreview(generatePDF(datalistReports),imageView);
+
+                    shareBtn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            sharePDF(generatePDF(datalistReports));
+                            reportDialog.dismiss();
+                        }
+                    });
+
+                    cancelBtn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            reportDialog.dismiss();
+                        }
+                    });
+                }
             }
         });
 
@@ -460,6 +551,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists()){
                     datalist.clear();
+                    datalistReports.clear();
                     double grandtotal = 0.0;
                     int grandqty = 0;
                     for (DataSnapshot ds: snapshot.getChildren()){
@@ -474,6 +566,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                                     ds.child("totalAmount").getValue().toString()
                             );
                             datalist.add(model);
+                            datalistReports.add(model);
                             grandtotal += Double.parseDouble(ds.child("totalAmount").getValue().toString());
                             grandqty += Integer.parseInt(ds.child("qty").getValue().toString());
                         }
@@ -528,6 +621,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                 String selectedDate = (datePicker.getMonth()+1)+"/"+datePicker.getYear();
                 date.setText(selectedDate);
                 currentMonth = new DateFormatSymbols().getMonths()[datePicker.getMonth()] +", "+datePicker.getYear();
+                currentReportDate = new DateFormatSymbols().getMonths()[datePicker.getMonth()] +", "+datePicker.getYear();
                 fetchData();
                 alertdialog.dismiss();
             }
@@ -929,6 +1023,472 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         } else {
             int total = Integer.parseInt("0"+qtyInput.getText().toString().trim())*Integer.parseInt("0"+amountInput.getText().toString().trim())+Integer.parseInt("0"+itemAmountInput.getText().toString().trim());
             totalAmountDialog.setText("Rs "+total+"/-");
+        }
+    }
+
+    public String generatePDF(ArrayList<MonthlyDetailModel> reportDataList){
+        // Check and request storage permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                // If permission is not granted, request it
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 112);
+            }
+        }
+//        String path = getExternalFilesDir(null) + "/"+personName+" - ATTARI DAIRY - Monthly Milk Report - "+currentReportDate+".pdf";
+
+        File file = new File(getExternalFilesDir(null), personName + " - ATTARI DAIRY - Monthly Milk Report - " + currentReportDate + ".pdf");
+        String path = file.getAbsolutePath();
+
+        String balance = balancedAmount.getText().toString().trim();
+        if(balancedAmount.getText().toString().trim().equals(grandTotalAmount.getText().toString().trim())){
+            balance = "0";
+        }
+
+//        if(sortingStatus.equals("dsc")){
+//            Collections.reverse(reportDataList);
+//        }
+//        Collections.sort(reportDataList, new Comparator<MonthlyDetailModel>() {
+//            @Override
+//            public int compare(MonthlyDetailModel o1, MonthlyDetailModel o2) {
+//                return o1.getDate().compareTo(o2.getDate());
+//            }
+//        });
+
+        if(reportDataList.size() == 0){
+            Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
+            alertdialog.setContentView(R.layout.dialog_error);
+            alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+            alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+            alertdialog.getWindow().setGravity(Gravity.CENTER);
+            alertdialog.setCancelable(false);
+            alertdialog.setCanceledOnTouchOutside(false);
+            TextView message = alertdialog.findViewById(R.id.msgDialog);
+            message.setText("PDF not generated because no data found!!!");
+            alertdialog.show();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    alertdialog.dismiss();
+                }
+            },3000);
+        } else {
+
+            loaderDialog = new Dialog(MonthlySupplyDetailActivity.this);
+            loaderDialog.setContentView(R.layout.dialog_loading);
+            loaderDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+            loaderDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            loaderDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+            loaderDialog.getWindow().setGravity(Gravity.CENTER);
+            loaderDialog.setCancelable(false);
+            loaderDialog.setCanceledOnTouchOutside(false);
+            TextView msg = loaderDialog.findViewById(R.id.msgDialog);
+            msg.setText("PDF generating in process!!!");
+            loaderDialog.show();
+
+            try {
+                PdfWriter writer = new PdfWriter(path);
+                PdfDocument pdfDocument = new PdfDocument(writer);
+                Document document = new Document(pdfDocument, PageSize.A4);
+
+                AssetManager assetManager = getAssets();
+
+//                PdfFont fontBold = PdfFontFactory.createFont(assetManager.open("fonts/poppins_bold.ttf").toString(),PdfEncodings.IDENTITY_H);
+//                PdfFont fontSemiBold = PdfFontFactory.createFont(assetManager.open("fonts/poppins_semibold.ttf").toString(),PdfEncodings.IDENTITY_H);
+//                PdfFont fontMedium = PdfFontFactory.createFont(assetManager.open("fonts/poppins_medium.ttf").toString(),PdfEncodings.IDENTITY_H);
+//                PdfFont fontRegular = PdfFontFactory.createFont(assetManager.open("fonts/poppins_regular.ttf").toString(),PdfEncodings.IDENTITY_H);
+//                PdfFont fontLight = PdfFontFactory.createFont(assetManager.open("fonts/poppins_light.ttf").toString(),PdfEncodings.IDENTITY_H);
+//                PdfFont fontThin = PdfFontFactory.createFont(assetManager.open("fonts/poppins_thin.ttf").toString(),PdfEncodings.IDENTITY_H);
+
+
+                PdfFont fontBold = PdfFontFactory.createFont(FontProgramFactory.createFont("res/font/poppins_bold.ttf"));
+                PdfFont fontSemiBold = PdfFontFactory.createFont(FontProgramFactory.createFont("res/font/poppins_semibold.ttf"));
+                PdfFont fontMedium = PdfFontFactory.createFont(FontProgramFactory.createFont("res/font/poppins_medium.ttf"));
+                PdfFont fontRegular = PdfFontFactory.createFont(FontProgramFactory.createFont("res/font/poppins_regular.ttf"));
+                PdfFont fontLight = PdfFontFactory.createFont(FontProgramFactory.createFont("res/font/poppins_light.ttf"));
+                PdfFont fontThin = PdfFontFactory.createFont(FontProgramFactory.createFont("res/font/poppins_thin.ttf"));
+
+                // Add header
+                Paragraph header = new Paragraph("Attari Dairy")
+                        .setFont(fontBold)
+                        .setFontSize(14)
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setBackgroundColor(new DeviceRgb(0xF5, 0xF7, 0xFA))
+                        .setMarginBottom(15)
+                        .setPaddings(10f, 10f, 10f, 10f)
+                        .setFontColor(new DeviceRgb(0x4C, 0x4C, 0x4C))
+                        .setBorderRadius(new BorderRadius(5f));
+                document.add(header);
+
+                Paragraph clientName = new Paragraph(personName+"'s Monthly Milk Report")
+                        .setFont(fontSemiBold)
+                        .setFontSize(11)
+                        .setTextAlignment(TextAlignment.LEFT)
+                        .setMarginBottom(-12)
+                        .setFontColor(new DeviceRgb(0x00, 0x00, 0x00));
+                document.add(clientName);
+
+                Paragraph clientContact = new Paragraph(contact)
+                        .setFont(fontMedium)
+                        .setFontSize(10)
+                        .setTextAlignment(TextAlignment.LEFT)
+                        .setMarginBottom(-12)
+                        .setFontColor(new DeviceRgb(0x4C, 0x4C, 0x4C));
+                document.add(clientContact);
+
+                Paragraph reportDate = new Paragraph("1st "+currentReportDate+" - 30th "+currentReportDate)
+                        .setFont(fontMedium)
+                        .setFontSize(10)
+                        .setTextAlignment(TextAlignment.LEFT)
+                        .setMarginBottom(15)
+                        .setFontColor(new DeviceRgb(0x4C, 0x4C, 0x4C));
+                document.add(reportDate);
+
+                // Add summary header
+                Table summaryHeadTable = new Table(UnitValue.createPercentArray(new float[]{1, 1, 1, 1}))
+                        .useAllAvailableWidth()
+                        .setMarginBottom(-10);
+                summaryHeadTable.addCell(new Cell().add(new Paragraph("Milk Rate")
+                        .setFont(fontMedium)
+                        .setFontSize(10)
+                        .setTextAlignment(TextAlignment.LEFT)
+                        .setFontColor(new DeviceRgb(0x4C, 0x4C, 0x4C)))
+                        .setBorder(null)
+                        .setPaddings(3,0,0,0)
+                );
+                summaryHeadTable.addCell(new Cell().add(new Paragraph("Total Quantity")
+                        .setFont(fontMedium)
+                        .setFontSize(10)
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setFontColor(new DeviceRgb(0x4C, 0x4C, 0x4C)))
+                        .setBorder(null)
+                        .setBorderLeft(new SolidBorder(new DeviceRgb(0xE6, 0xED, 0xF0), 2))
+                        .setPaddings(3,0,0,0)
+                );
+                summaryHeadTable.addCell(new Cell().add(new Paragraph("Total Amount")
+                        .setFont(fontMedium)
+                        .setFontSize(10)
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setFontColor(new DeviceRgb(0x4C, 0x4C, 0x4C)))
+                        .setBorder(null)
+                        .setBorderLeft(new SolidBorder(new DeviceRgb(0xE6, 0xED, 0xF0), 2))
+                        .setBorderRight(new SolidBorder(new DeviceRgb(0xE6, 0xED, 0xF0), 2))
+                        .setPaddings(3,0,0,0)
+                );
+                summaryHeadTable.addCell(new Cell().add(new Paragraph("Pending Balance")
+                        .setFont(fontMedium)
+                        .setFontSize(10)
+                        .setTextAlignment(TextAlignment.RIGHT)
+                        .setFontColor(new DeviceRgb(0x4C, 0x4C, 0x4C)))
+                        .setBorder(null)
+                        .setPaddings(3,0,0,0)
+                );
+                document.add(summaryHeadTable);
+
+
+                // Add summary content
+                Table summaryContentTable = new Table(UnitValue.createPercentArray(new float[]{1, 1, 1, 1}))
+                        .useAllAvailableWidth()
+                        .setMarginBottom(25);
+                summaryContentTable.addCell(new Cell().add(new Paragraph("Rs "+DashboardActivity.getMilkRate())
+                        .setFont(fontBold)
+                        .setFontSize(12)
+                        .setTextAlignment(TextAlignment.LEFT)
+                        .setFontColor(new DeviceRgb(0x4C, 0x4C, 0x4C)))
+                        .setBorder(null)
+                        .setPaddings(0,0,3,0)
+                );
+                summaryContentTable.addCell(new Cell().add(new Paragraph(totalQty.getText().toString().trim()+"kg")
+                        .setFont(fontBold)
+                        .setFontSize(12)
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setFontColor(new DeviceRgb(0x4C, 0x4C, 0x4C)))
+                        .setBorder(null)
+                        .setBorderLeft(new SolidBorder(new DeviceRgb(0xE6, 0xED, 0xF0), 2))
+                        .setPaddings(0,0,3,0)
+                );
+                summaryContentTable.addCell(new Cell().add(new Paragraph("Rs "+grandTotalAmount.getText().toString().trim())
+                        .setFont(fontBold)
+                        .setFontSize(12)
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setFontColor(new DeviceRgb(0x4C, 0x4C, 0x4C)))
+                        .setBorder(null)
+                        .setBorderLeft(new SolidBorder(new DeviceRgb(0xE6, 0xED, 0xF0), 2))
+                        .setBorderRight(new SolidBorder(new DeviceRgb(0xE6, 0xED, 0xF0), 2))
+                        .setPaddings(0,0,3,0)
+                );
+                summaryContentTable.addCell(new Cell().add(new Paragraph("Rs "+balance)
+                        .setFont(fontBold)
+                        .setFontSize(12)
+                        .setTextAlignment(TextAlignment.RIGHT)
+                        .setFontColor(new DeviceRgb(0x49, 0xB7, 0x6F)))
+                        .setBorder(null)
+                        .setPaddings(0,0,3,0)
+                );
+                document.add(summaryContentTable);
+
+                // Add table header
+                Table dataHeadTable = new Table(UnitValue.createPercentArray(new float[]{0, 2, 2, 2, 2, 2, 2}))
+                        .useAllAvailableWidth()
+                        .setMarginBottom(15);
+                dataHeadTable.addCell(new Cell().add(new Paragraph("#")
+                                .setFont(fontSemiBold)
+                                .setFontSize(9)
+                                .setTextAlignment(TextAlignment.LEFT)
+                                .setFontColor(new DeviceRgb(0x00, 0x00, 0x00)))
+                        .setBorder(null)
+                        .setPaddings(0,0,5,0)
+                );
+                dataHeadTable.addCell(new Cell().add(new Paragraph("Date")
+                                .setFont(fontSemiBold)
+                                .setFontSize(9)
+                                .setTextAlignment(TextAlignment.CENTER)
+                                .setFontColor(new DeviceRgb(0x00, 0x00, 0x00)))
+                        .setBorder(null)
+                        .setPaddings(0,0,5,0)
+                );
+                dataHeadTable.addCell(new Cell().add(new Paragraph("QTY")
+                                .setFont(fontSemiBold)
+                                .setFontSize(9)
+                                .setTextAlignment(TextAlignment.CENTER)
+                                .setFontColor(new DeviceRgb(0x00, 0x00, 0x00)))
+                        .setBorder(null)
+                        .setPaddings(0,0,5,0)
+                );
+                dataHeadTable.addCell(new Cell().add(new Paragraph("Amount")
+                                .setFont(fontSemiBold)
+                                .setFontSize(9)
+                                .setTextAlignment(TextAlignment.CENTER)
+                                .setFontColor(new DeviceRgb(0x00, 0x00, 0x00)))
+                        .setBorder(null)
+                        .setPaddings(0,0,5,0)
+                );
+                dataHeadTable.addCell(new Cell().add(new Paragraph("Item Name")
+                                .setFont(fontSemiBold)
+                                .setFontSize(9)
+                                .setTextAlignment(TextAlignment.CENTER)
+                                .setFontColor(new DeviceRgb(0x00, 0x00, 0x00)))
+                        .setBorder(null)
+                        .setPaddings(0,0,5,0)
+                );
+                dataHeadTable.addCell(new Cell().add(new Paragraph("Item Amount")
+                                .setFont(fontSemiBold)
+                                .setFontSize(9)
+                                .setTextAlignment(TextAlignment.CENTER)
+                                .setFontColor(new DeviceRgb(0x00, 0x00, 0x00)))
+                        .setBorder(null)
+                        .setPaddings(0,0,5,0)
+                );
+                dataHeadTable.addCell(new Cell().add(new Paragraph("Total Amount")
+                                .setFont(fontSemiBold)
+                                .setFontSize(9)
+                                .setTextAlignment(TextAlignment.RIGHT)
+                                .setFontColor(new DeviceRgb(0x00, 0x00, 0x00)))
+                        .setBorder(null)
+                        .setPaddings(0,0,5,0)
+                );
+
+                int rowsPerPageFirstPage = 16; // Number of rows for the first page
+                int rowsPerPageOtherPages = 20; // Number of rows for other pages
+                int rowCount = 0;
+                int pageNumber = 1;
+
+                for(int i=0; i<reportDataList.size(); i++){
+                    int rowsPerPage = 0;
+
+                    if(pageNumber == 1){
+                        rowsPerPage = rowsPerPageFirstPage;
+                    } else {
+                        rowsPerPageOtherPages += rowsPerPageOtherPages-rowsPerPageFirstPage;
+                        rowsPerPage = rowsPerPageOtherPages;
+                    }
+
+//                    if(rowCount % rowsPerPage == 0 && rowCount != 0){
+//                        document.add(dataHeadTable);
+//                        addPageNumber(document, pageNumber, fontRegular);
+//                        document.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+//                        pageNumber++;
+//                        dataHeadTable = new Table(UnitValue.createPercentArray(new float[]{0, 2, 2, 2, 2, 2, 2}))
+//                                .useAllAvailableWidth()
+//                                .setMarginBottom(15);
+//
+//                        dataHeadTable.addCell(new Cell().add(new Paragraph("#")
+//                                        .setFont(fontSemiBold)
+//                                        .setFontSize(9)
+//                                        .setTextAlignment(TextAlignment.LEFT)
+//                                        .setFontColor(new DeviceRgb(0x00, 0x00, 0x00)))
+//                                .setBorder(null)
+//                                .setPaddings(0,0,5,0)
+//                        );
+//                        dataHeadTable.addCell(new Cell().add(new Paragraph("Date")
+//                                        .setFont(fontSemiBold)
+//                                        .setFontSize(9)
+//                                        .setTextAlignment(TextAlignment.CENTER)
+//                                        .setFontColor(new DeviceRgb(0x00, 0x00, 0x00)))
+//                                .setBorder(null)
+//                                .setPaddings(0,0,5,0)
+//                        );
+//                        dataHeadTable.addCell(new Cell().add(new Paragraph("QTY")
+//                                        .setFont(fontSemiBold)
+//                                        .setFontSize(9)
+//                                        .setTextAlignment(TextAlignment.CENTER)
+//                                        .setFontColor(new DeviceRgb(0x00, 0x00, 0x00)))
+//                                .setBorder(null)
+//                                .setPaddings(0,0,5,0)
+//                        );
+//                        dataHeadTable.addCell(new Cell().add(new Paragraph("Amount")
+//                                        .setFont(fontSemiBold)
+//                                        .setFontSize(9)
+//                                        .setTextAlignment(TextAlignment.CENTER)
+//                                        .setFontColor(new DeviceRgb(0x00, 0x00, 0x00)))
+//                                .setBorder(null)
+//                                .setPaddings(0,0,5,0)
+//                        );
+//                        dataHeadTable.addCell(new Cell().add(new Paragraph("Item Name")
+//                                        .setFont(fontSemiBold)
+//                                        .setFontSize(9)
+//                                        .setTextAlignment(TextAlignment.CENTER)
+//                                        .setFontColor(new DeviceRgb(0x00, 0x00, 0x00)))
+//                                .setBorder(null)
+//                                .setPaddings(0,0,5,0)
+//                        );
+//                        dataHeadTable.addCell(new Cell().add(new Paragraph("Item Amount")
+//                                        .setFont(fontSemiBold)
+//                                        .setFontSize(9)
+//                                        .setTextAlignment(TextAlignment.CENTER)
+//                                        .setFontColor(new DeviceRgb(0x00, 0x00, 0x00)))
+//                                .setBorder(null)
+//                                .setPaddings(0,0,5,0)
+//                        );
+//                        dataHeadTable.addCell(new Cell().add(new Paragraph("Total Amount")
+//                                        .setFont(fontSemiBold)
+//                                        .setFontSize(9)
+//                                        .setTextAlignment(TextAlignment.RIGHT)
+//                                        .setFontColor(new DeviceRgb(0x00, 0x00, 0x00)))
+//                                .setBorder(null)
+//                                .setPaddings(0,0,5,0)
+//                        );
+//                    }
+
+                    if(reportDataList.get(i).getItemName().equals("")){
+                        dataHeadTable.addCell(createCell(""+(i+1), fontRegular));
+                        dataHeadTable.addCell(createCell(reportDataList.get(i).getDate(), fontRegular));
+                        dataHeadTable.addCell(createCell(reportDataList.get(i).getQty()+"kg", fontRegular));
+                        dataHeadTable.addCell(createCell("Rs "+reportDataList.get(i).getAmount(), fontRegular));
+                        dataHeadTable.addCell(createCell("-", fontRegular));
+                        dataHeadTable.addCell(createCell("-", fontRegular));
+                        dataHeadTable.addCell(createCell("Rs "+reportDataList.get(i).getTotalAmount(), fontSemiBold, new DeviceRgb(0x49, 0xB7, 0x6F)));
+
+                    } else {
+                        dataHeadTable.addCell(createCell(""+(i+1), fontRegular));
+                        dataHeadTable.addCell(createCell(reportDataList.get(i).getDate(), fontRegular));
+                        dataHeadTable.addCell(createCell(reportDataList.get(i).getQty()+"kg", fontRegular));
+                        dataHeadTable.addCell(createCell("Rs "+reportDataList.get(i).getAmount(), fontRegular));
+                        dataHeadTable.addCell(createCell(reportDataList.get(i).getItemName(), fontRegular));
+                        dataHeadTable.addCell(createCell("Rs "+reportDataList.get(i).getItemAmount(), fontRegular));
+                        dataHeadTable.addCell(createCell("Rs "+reportDataList.get(i).getTotalAmount(), fontSemiBold, new DeviceRgb(0x49, 0xB7, 0x6F)));
+                    }
+                    rowCount++;
+                }
+
+                document.add(dataHeadTable);
+                addPageNumber(document, pageNumber, fontRegular);
+                document.close();
+                loaderDialog.dismiss();
+                reportDialog.show();
+                return path;
+
+            } catch (Exception e) {
+                loaderDialog.dismiss();
+                reportDialog.dismiss();
+                Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
+                alertdialog.setContentView(R.layout.dialog_error);
+                alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                alertdialog.getWindow().setGravity(Gravity.CENTER);
+                alertdialog.setCancelable(false);
+                alertdialog.setCanceledOnTouchOutside(false);
+                TextView message = alertdialog.findViewById(R.id.msgDialog);
+                message.setText("Something went wrong, PDF not generated!!!");
+                alertdialog.show();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        alertdialog.dismiss();
+                    }
+                },3000);
+                e.printStackTrace();
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private void addPageNumber(Document document, int pageNumber, PdfFont font) {
+        Paragraph footer = new Paragraph("Page " + pageNumber)
+                .setTextAlignment(TextAlignment.CENTER)
+                .setFont(font)
+                .setFontSize(10)
+                .setFontColor(new DeviceRgb(0x00, 0x00, 0x06))
+                .setVerticalAlignment(VerticalAlignment.BOTTOM);
+        document.showTextAligned(footer, 297.5f, 15, document.getPdfDocument().getNumberOfPages(), TextAlignment.CENTER, VerticalAlignment.BOTTOM, 0);
+    }
+
+    private static Cell createCell(String content, PdfFont font) {
+        return new Cell()
+                .add(new Paragraph(content)
+                        .setFont(font)
+                        .setFontSize(8)
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setFontColor(new DeviceRgb(0x00, 0x00, 0x06)))
+                .setBorder(null)
+                .setBorderTop(new SolidBorder(new DeviceRgb(0xE6, 0xED, 0xF0), 1))
+                .setPaddings(5,0,5,0);
+    }
+
+    private static Cell createCell(String content, PdfFont font, com.itextpdf.kernel.colors.Color color) {
+        return new Cell()
+                .add(new Paragraph(content)
+                        .setFont(font)
+                        .setFontSize(8)
+                        .setTextAlignment(TextAlignment.RIGHT)
+                        .setFontColor(color))
+                .setBorder(null)
+                .setBorderTop(new SolidBorder(new DeviceRgb(0xE6, 0xED, 0xF0), 1))
+                .setPaddings(5,5,5,0)
+                .setBackgroundColor(new DeviceRgb(0xF5, 0xF7, 0xFA));
+    }
+
+    public void sharePDF(String path){
+        if(path != null){
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("application/pdf");
+            File file = new File(path);
+            Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".provider", file);
+            intent.putExtra(Intent.EXTRA_STREAM, uri);
+            startActivity(Intent.createChooser(intent, "Share PDF"));
+        }
+    }
+
+    private void showPdfPreview(String path, ImageView pdfImageView) {
+        if (path != null) {
+            try {
+                File file = new File(path);
+                ParcelFileDescriptor parcelFileDescriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+                PdfRenderer pdfRenderer = new PdfRenderer(parcelFileDescriptor);
+                PdfRenderer.Page currentPage = pdfRenderer.openPage(0);
+                Bitmap bitmap = Bitmap.createBitmap(currentPage.getWidth(), currentPage.getHeight(), Bitmap.Config.ARGB_8888);
+                currentPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+                pdfImageView.setImageBitmap(bitmap);
+                currentPage.close();
+                pdfRenderer.close();
+                parcelFileDescriptor.close();
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

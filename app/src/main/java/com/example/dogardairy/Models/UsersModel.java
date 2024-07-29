@@ -1,16 +1,17 @@
 package com.example.dogardairy.Models;
 
 public class UsersModel {
-    String id, name, email, image, role, milkRate, stockRate, created_on, status;
+    String id, name, email, pwd, image, role, milkRate, stockRate, created_on, status;
 
     public UsersModel(){
 
     }
 
-    public UsersModel(String id, String name, String email, String image, String role, String milkRate, String stockRate, String created_on, String status) {
+    public UsersModel(String id, String name, String email, String pwd, String image, String role, String milkRate, String stockRate, String created_on, String status) {
         this.id = id;
         this.name = name;
         this.email = email;
+        this.pwd = pwd;
         this.image = image;
         this.role = role;
         this.milkRate = milkRate;
@@ -61,5 +62,13 @@ public class UsersModel {
 
     public void setStockRate(String stockRate) {
         this.stockRate = stockRate;
+    }
+
+    public String getPwd() {
+        return pwd;
+    }
+
+    public void setPwd(String pwd) {
+        this.pwd = pwd;
     }
 }

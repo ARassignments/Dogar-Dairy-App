@@ -232,6 +232,7 @@ public class LoginActivity extends AppCompatActivity {
                                                     @Override
                                                     public void run() {
                                                         dialog.dismiss();
+                                                        MainActivity.db.child("Users").child(UID).child("pwd").setValue(pwdInput.getText().toString().trim());
                                                         startActivity(new Intent(LoginActivity.this, DashboardActivity.class));
                                                         finish();
                                                     }
