@@ -38,7 +38,7 @@
                     android:id="@+id/givenAmountLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="8dp"
                     app:endIconMode="clear_text"
                     app:counterMaxLength="5"
                     app:helperText="Only Digits Allowed"
@@ -53,6 +53,35 @@
                         android:layout_height="wrap_content"
                         android:inputType="number"
                         android:maxLength="5"
+                        style="@style/inputTextEditMaterial"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/paymentMethodLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:endIconMode="dropdown_menu"
+                    app:counterMaxLength="0"
+                    app:counterEnabled="false"
+                    app:helperText=""
+                    helperTextEnabled="false"
+                    android:hint="Payment Method Here..."
+                    style="@style/inputTextMaterial">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/paymentMethodInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPersonName"
+                        android:maxLength="20"
+                        android:paddingHorizontal="20dp"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="16dp"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:clickable="false"
                         style="@style/inputTextEditMaterial"/>
 
                 </com.google.android.material.textfield.TextInputLayout>

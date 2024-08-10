@@ -517,7 +517,7 @@
     <style name="authLink">
         <item name="android:fontFamily">@font/poppins_semibold</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@color/accent_50</item>
+        <item name="android:textColor">@color/accent_60</item>
     </style>
 
     <style name="authLabel">
@@ -528,6 +528,53 @@
 
     <style name="loaderTint">
         <item name="android:indeterminateTint">@color/primary_50</item>
+    </style>
+
+<!--    Bill List-->
+
+    <style name="billBg">
+        <item name="android:background">@drawable/bill_bg</item>
+    </style>
+
+    <style name="billDate">
+        <item name="android:fontFamily">@font/poppins_semibold</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/neutral_50</item>
+    </style>
+
+    <style name="billLabel">
+        <item name="android:fontFamily">@font/poppins_medium</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/neutral_50</item>
+    </style>
+
+    <style name="billText">
+        <item name="android:fontFamily">@font/poppins_semibold</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/primary_50</item>
+    </style>
+
+    <style name="billLabelDialog">
+        <item name="android:fontFamily">@font/poppins_semibold</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/neutral_50</item>
+    </style>
+
+    <style name="billTextDialog">
+        <item name="android:fontFamily">@font/poppins_semibold</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/primary_90</item>
+    </style>
+
+    <style name="billGivenAmountDialog">
+        <item name="android:fontFamily">@font/poppins_semibold</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/accent_50</item>
+    </style>
+
+    <style name="billPaidImageDialog">
+        <item name="android:alpha">0.10</item>
+        <item name="android:tint">@color/primary_50</item>
     </style>
 
     <!--    Welcome-->

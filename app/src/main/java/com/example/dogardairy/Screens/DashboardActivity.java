@@ -88,7 +88,7 @@ public class DashboardActivity extends AppCompatActivity {
                 case "Search":
                     replaceFragment(new SearchFragment());
                     break;
-                case "Reports":
+                case "Bills":
                     replaceFragment(new ReportsFragment());
                     break;
             }

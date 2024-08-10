@@ -7,6 +7,6 @@
         android:title="Search"
         android:icon="@drawable/search_menu"/>
     <item android:id="@+id/library"
-        android:title="Reports"
+        android:title="Bills"
         android:icon="@drawable/library_menu"/>
 </menu>

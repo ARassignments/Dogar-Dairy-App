@@ -61,8 +61,10 @@ public class MonthlySupplyActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
     static String UID = "";
+    static String sortingStatus = "dsc";
     ListView listView;
     LinearLayout loader, notifyBar, notfoundContainer;
+    ImageView sortBtn;
     EditText searchInput;
     TextView searchedWord, totalCount;
     ExtendedFloatingActionButton addBtn;
@@ -97,6 +99,7 @@ public class MonthlySupplyActivity extends AppCompatActivity {
         totalCount = findViewById(R.id.totalCount);
         searchInput = findViewById(R.id.searchInput);
         addBtn = findViewById(R.id.addBtn);
+        sortBtn = findViewById(R.id.sortBtn);
 
         //date picker start
         Calendar calendar = Calendar.getInstance();
@@ -132,12 +135,30 @@ public class MonthlySupplyActivity extends AppCompatActivity {
 
         fetchData("");
 
+        sortBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sorting();
+            }
+        });
+
         findViewById(R.id.backBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 MonthlySupplyActivity.super.onBackPressed();
             }
         });
+    }
+
+    public void sorting(){
+        if(sortingStatus.equals("asc")){
+            sortingStatus = "dsc";
+            sortBtn.setImageResource(R.drawable.deasscending_order);
+        } else if(sortingStatus.equals("dsc")){
+            sortingStatus = "asc";
+            sortBtn.setImageResource(R.drawable.asscending_order);
+        }
+        fetchData("");
     }
 
     public void fetchData(String data){
@@ -154,7 +175,8 @@ public class MonthlySupplyActivity extends AppCompatActivity {
                                         ds.child("contact").getValue().toString(),
                                         ds.child("balance").getValue().toString(),
                                         ds.child("userId").getValue().toString(),
-                                        ds.child("MonthlyDetail").getValue().toString()
+                                        ds.child("MonthlyDetail").getValue().toString(),
+                                        ds.child("milkRate").getValue().toString()
                                 );
                                 datalist.add(model);
                             } else {
@@ -164,7 +186,8 @@ public class MonthlySupplyActivity extends AppCompatActivity {
                                             ds.child("contact").getValue().toString(),
                                             ds.child("balance").getValue().toString(),
                                             ds.child("userId").getValue().toString(),
-                                            ds.child("MonthlyDetail").getValue().toString()
+                                            ds.child("MonthlyDetail").getValue().toString(),
+                                            ds.child("milkRate").getValue().toString()
                                     );
                                     datalist.add(model);
                                 }
@@ -177,7 +200,8 @@ public class MonthlySupplyActivity extends AppCompatActivity {
                                             ds.child("contact").getValue().toString(),
                                             ds.child("balance").getValue().toString(),
                                             ds.child("userId").getValue().toString(),
-                                            ds.child("MonthlyDetail").getValue().toString()
+                                            ds.child("MonthlyDetail").getValue().toString(),
+                                            ds.child("milkRate").getValue().toString()
                                     );
                                     datalist.add(model);
                                 } else {
@@ -187,7 +211,8 @@ public class MonthlySupplyActivity extends AppCompatActivity {
                                                 ds.child("contact").getValue().toString(),
                                                 ds.child("balance").getValue().toString(),
                                                 ds.child("userId").getValue().toString(),
-                                                ds.child("MonthlyDetail").getValue().toString()
+                                                ds.child("MonthlyDetail").getValue().toString(),
+                                                ds.child("milkRate").getValue().toString()
                                         );
                                         datalist.add(model);
                                     }
@@ -200,7 +225,9 @@ public class MonthlySupplyActivity extends AppCompatActivity {
                         loader.setVisibility(View.GONE);
                         listView.setVisibility(View.VISIBLE);
                         notfoundContainer.setVisibility(View.GONE);
-                        Collections.reverse(datalist);
+                        if(sortingStatus.equals("dsc")){
+                            Collections.reverse(datalist);
+                        }
                         MyAdapter adapter = new MyAdapter(MonthlySupplyActivity.this,datalist);
                         listView.setAdapter(adapter);
                     } else {
@@ -312,7 +339,7 @@ public class MonthlySupplyActivity extends AppCompatActivity {
 
     public boolean nameValidation(){
         String input = nameInput.getText().toString().trim();
-        String regex = "^[a-zA-Z\\s]*$";
+        String regex = "^[a-zA-Z0-9\\s]*$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
         if(input.equals("")){
@@ -380,6 +407,7 @@ public class MonthlySupplyActivity extends AppCompatActivity {
                 mydata.put("balance", "0");
                 mydata.put("userId", UID);
                 mydata.put("MonthlyDetail", "");
+                mydata.put("milkRate", "0");
                 MainActivity.db.child("Monthly").push().setValue(mydata);
                 message.setText("Person Added Successfully!!!");
             } else if(purpose.equals("edit")){
@@ -476,6 +504,7 @@ public class MonthlySupplyActivity extends AppCompatActivity {
                     intent.putExtra("balance",data.get(i).getBalance());
                     intent.putExtra("contact",data.get(i).getContact());
                     intent.putExtra("personName",data.get(i).getName());
+                    intent.putExtra("milkRate",data.get(i).getMilkRate());
                     startActivity(intent);
                 }
             });
@@ -571,6 +600,16 @@ public class MonthlySupplyActivity extends AppCompatActivity {
 
                 }
             });
+
+            if(i==data.size()-1){
+                customListItem.setPadding(customListItem.getPaddingLeft(), customListItem.getPaddingTop(),customListItem.getPaddingRight(), 30);
+            }
+            if(i==0){
+                customListItem.setPadding(customListItem.getPaddingLeft(), 0,customListItem.getPaddingRight(), 0);
+            }
+            customListItem.setAlpha(0f);
+            customListItem.animate().alpha(1f).setDuration(300).setStartDelay(i * 2).start();
+
 
             return customListItem;
         }

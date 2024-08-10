@@ -6,7 +6,7 @@
     style="@style/ScreenBg"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Screens.MonthlySupplyDetailActivity">
+    tools:context=".Screens.BillActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -25,7 +25,7 @@
             android:id="@+id/appBarTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Monthly Supply"
+            android:text="Paid Bill"
             android:layout_marginHorizontal="10dp"
             android:layout_marginTop="2dp"
             android:layout_weight="1"
@@ -41,26 +41,10 @@
             style="@style/appBarText"/>
 
         <ImageView
-            android:id="@+id/callBtn"
+            android:id="@+id/fullListBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/call"
-            android:layout_marginStart="10dp"
-            style="@style/appBarIcon"/>
-
-        <ImageView
-            android:id="@+id/milkRateBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/rate"
-            android:layout_marginStart="10dp"
-            style="@style/appBarIcon"/>
-
-        <ImageView
-            android:id="@+id/billBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/bill"
+            android:src="@drawable/list"
             android:layout_marginStart="10dp"
             style="@style/appBarIcon"/>
 
@@ -70,49 +54,6 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         style="@style/horizontalRow"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginHorizontal="30dp"
-        android:gravity="center">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Date"
-            android:layout_marginHorizontal="8dp"
-            android:layout_weight="1"
-            android:textAlignment="center"
-            style="@style/authTitle"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Qty"
-            android:layout_marginHorizontal="8dp"
-            android:layout_weight="1"
-            android:textAlignment="center"
-            style="@style/authTitle"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Amount"
-            android:layout_marginHorizontal="8dp"
-            android:layout_weight="1"
-            android:textAlignment="center"
-            style="@style/authTitle"/>
-
-        <ImageView
-            android:id="@+id/sortBtn"
-            android:layout_width="22dp"
-            android:layout_height="wrap_content"
-            android:src="@drawable/deasscending_order"
-            style="@style/appBarIcon" />
-
-    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/notfoundContainer"
@@ -157,13 +98,14 @@
         android:divider="@null"
         android:dividerHeight="0dp"
         android:visibility="visible"
-        tools:listitem="@layout/monthly_supply_custom_listview"/>
+        tools:listitem="@layout/bill_custom_listview"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginHorizontal="30dp"
+        android:layout_marginBottom="30dp"
         style="@style/customButton">
 
         <LinearLayout
@@ -245,108 +187,6 @@
             </LinearLayout>
 
         </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="30dp"
-        android:layout_marginTop="16dp">
-
-        <ImageView
-            android:id="@+id/sendMessageBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/message"
-            android:layout_marginEnd="8dp"
-            style="@style/appBarIcon"/>
-
-        <FrameLayout
-            android:id="@+id/sendWhatsappMessageBtn"
-            android:layout_width="24dp"
-            android:layout_height="24dp">
-
-            <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:scaleType="fitXY"
-                android:layout_gravity="center"
-                android:src="@drawable/whatsapp"/>
-
-        </FrameLayout>
-
-        <ImageView
-            android:id="@+id/fullListBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/list"
-            android:layout_marginStart="8dp"
-            style="@style/appBarIcon"/>
-
-        <ImageView
-            android:id="@+id/deleteAllBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/delete"
-            android:layout_marginStart="8dp"
-            style="@style/appBarIcon"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Balance:"
-            android:layout_marginHorizontal="8dp"
-            android:layout_weight="1"
-            android:textAlignment="textEnd"
-            style="@style/authTitle"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Rs "
-            style="@style/authLabel"/>
-
-        <TextView
-            android:id="@+id/balancedAmount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0"
-            style="@style/authLabel"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="/-"
-            style="@style/authLabel"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="30dp"
-        android:layout_marginBottom="30dp"
-        android:layout_marginTop="20dp">
-
-        <Button
-            android:id="@+id/addQuantityBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Add Quantity"
-            android:layout_marginRight="16dp"
-            android:drawableStart="@drawable/plus"
-            style="@style/flatIconButton"/>
-
-        <Button
-            android:id="@+id/unpaidBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="3"
-            android:text="Unpaid"
-            android:drawableStart="@drawable/wallet"
-            style="@style/flatIconButton"/>
 
     </LinearLayout>
 

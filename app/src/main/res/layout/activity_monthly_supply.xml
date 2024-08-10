@@ -51,14 +51,31 @@
             android:layout_height="1dp"
             style="@style/horizontalRow"/>
 
-        <EditText
-            android:id="@+id/searchInput"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Search Name Here..."
             android:layout_marginHorizontal="30dp"
-            android:layout_marginTop="20dp"
-            style="@style/inputText" />
+            android:layout_marginTop="20dp">
+
+            <EditText
+                android:id="@+id/searchInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:maxLength="25"
+                android:hint="Search Name Here..."
+                style="@style/inputText" />
+
+            <ImageView
+                android:id="@+id/sortBtn"
+                android:layout_width="22dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/deasscending_order"
+                android:layout_gravity="center|end"
+                android:layout_marginEnd="22dp"
+                style="@style/appBarIcon" />
+
+        </FrameLayout>
 
         <LinearLayout
             android:id="@+id/loader"
@@ -165,6 +182,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginTop="20dp"
             android:divider="@null"
             android:dividerHeight="0dp"
             android:visibility="gone"

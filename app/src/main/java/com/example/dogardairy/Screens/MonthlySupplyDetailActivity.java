@@ -25,6 +25,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -87,12 +89,15 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.DateFormatSymbols;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -105,11 +110,11 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
     SharedPreferences.Editor editor;
     static String UID = "";
     static String sortingStatus = "dsc";
-    String MonthlyId, currentDate, contact, personName, currentMonth, currentReportDate;
+    String MonthlyId, currentDate, contact, personName, currentMonth, currentReportDate, milkRate;
     ListView listView;
     LinearLayout notfoundContainer;
     TextView totalQty, grandTotalAmount, balancedAmount, date, appBarTitle;
-    ImageView sendMessageBtn, sortBtn, callBtn, fullListBtn;
+    ImageView sendMessageBtn, sortBtn, callBtn, fullListBtn, deleteAllBtn, milkRateBtn, billBtn;
     FrameLayout sendWhatsappMessageBtn;
     Button addQuantityBtn, unpaidBtn;
     ArrayList<MonthlyDetailModel> datalist = new ArrayList<>();
@@ -117,10 +122,11 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
     ArrayList<ItemsModel> datalistItems = new ArrayList<>();
 
     //    Dialog Elements
-    Dialog addQtyDialog, unpaidDialog, itemsDialog, loaderDialog, reportDialog;
+    Dialog addQtyDialog, unpaidDialog, itemsDialog, loaderDialog, reportDialog, milkRateDialog;
     TextView dateView, totalAmountUnpaid, balanceAmountUnpaid, totalAmountDialog;
-    TextInputEditText qtyInput, amountInput, itemNameInput, itemAmountInput, givenAmountInput;
-    TextInputLayout qtyLayout, amountLayout, itemNameLayout, itemAmountLayout, givenAmountLayout;
+    TextInputEditText qtyInput, amountInput, itemNameInput, itemAmountInput, givenAmountInput, supplyAmountInput;
+    TextInputLayout qtyLayout, amountLayout, itemNameLayout, itemAmountLayout, givenAmountLayout, paymentMethodLayout, supplyAmountLayout;
+    AutoCompleteTextView paymentMethodInput;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,6 +152,9 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         sortBtn = findViewById(R.id.sortBtn);
         callBtn = findViewById(R.id.callBtn);
         fullListBtn = findViewById(R.id.fullListBtn);
+        deleteAllBtn = findViewById(R.id.deleteAllBtn);
+        milkRateBtn = findViewById(R.id.milkRateBtn);
+        billBtn = findViewById(R.id.billBtn);
 
         if(!sharedPreferences.getString("UID","").equals("")){
             UID = sharedPreferences.getString("UID","").toString();
@@ -153,7 +162,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
 
         //date picker start
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("M/yyyy");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/M");
         currentDate = simpleDateFormat.format(calendar.getTime());
         currentMonth = new SimpleDateFormat("MMMM, yyyy").format(calendar.getTime());
         currentReportDate = new SimpleDateFormat("MMMM, yyyy").format(calendar.getTime());
@@ -165,6 +174,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             MonthlyId = extras.getString("MonthlyId");
             contact = extras.getString("contact");
             personName = extras.getString("personName");
+            milkRate = extras.getString("milkRate");
         }
 
         appBarTitle.setText(personName);
@@ -200,21 +210,30 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
 
                 for(int i=0;i<datalistReports.size();i++){
                     if(datalistReports.get(i).getItemName().equals("")){
-                        int total = Integer.parseInt(datalistReports.get(i).getQty())*Integer.parseInt(datalistReports.get(i).getAmount());
+                        double total = Double.parseDouble(datalistReports.get(i).getQty())*Double.parseDouble(datalistReports.get(i).getAmount());
                         txt += "     "+(i+1)+".  "+datalistReports.get(i).getDate()+"    "+datalistReports.get(i).getQty()+"kg     Rs "+total+"/- \n";
                     } else {
-                        int total = Integer.parseInt(datalistReports.get(i).getQty())*Integer.parseInt(datalistReports.get(i).getAmount());
+                        double total = Double.parseDouble(datalistReports.get(i).getQty())*Double.parseDouble(datalistReports.get(i).getAmount());
                         txt += "     "+(i+1)+".  "+datalistReports.get(i).getDate()+"    "+datalistReports.get(i).getQty()+"kg     Rs "+total+"/- \n" +
                                 "    ↳   Item:     "+datalistReports.get(i).getItemName()+"    Rs "+datalistReports.get(i).getItemAmount()+"/- \n";
                     }
                 }
 
-                txt += "_____________________________________\n\n" +
-                        "Milk Rate is: Rs "+DashboardActivity.getMilkRate()+"/- \n" +
-                        "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
-                        "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
-                        "Your pending Balance: Rs "+balance+"/-\n" +
-                        " ----- JazakAllah -----";
+                if(milkRate.equals("0")){
+                    txt += "_____________________________________\n\n" +
+                            "Milk Rate is: Rs "+DashboardActivity.getMilkRate()+"/- \n" +
+                            "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
+                            "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
+                            "Your pending Balance: Rs "+balance+"/-\n" +
+                            " ----- JazakAllah -----";
+                } else {
+                    txt += "_____________________________________\n\n" +
+                            "Milk Rate is: Rs "+milkRate+"/- \n" +
+                            "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
+                            "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
+                            "Your pending Balance: Rs "+balance+"/-\n" +
+                            " ----- JazakAllah -----";
+                }
 
 //                String txt = "                ATTARI DAIRY \n" +
 //                        "***** Monthly Milk Report ***** \n" +
@@ -300,21 +319,30 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
 
                         for(int i=0;i<datalistReports.size();i++){
                             if(datalistReports.get(i).getItemName().equals("")){
-                                int total = Integer.parseInt(datalistReports.get(i).getQty())*Integer.parseInt(datalistReports.get(i).getAmount());
+                                double total = Double.parseDouble(datalistReports.get(i).getQty())*Double.parseDouble(datalistReports.get(i).getAmount());
                                 txt += "     "+(i+1)+".  "+datalistReports.get(i).getDate()+"    "+datalistReports.get(i).getQty()+"kg     Rs "+total+"/- \n";
                             } else {
-                                int total = Integer.parseInt(datalistReports.get(i).getQty())*Integer.parseInt(datalistReports.get(i).getAmount());
+                                double total = Double.parseDouble(datalistReports.get(i).getQty())*Double.parseDouble(datalistReports.get(i).getAmount());
                                 txt += "     "+(i+1)+".  "+datalistReports.get(i).getDate()+"    "+datalistReports.get(i).getQty()+"kg     Rs "+total+"/- \n" +
                                         "    ↳   Item:     "+datalistReports.get(i).getItemName()+"    Rs "+datalistReports.get(i).getItemAmount()+"/- \n";
                             }
                         }
 
-                        txt += "_____________________________________\n\n" +
-                                "Milk Rate is: Rs "+DashboardActivity.getMilkRate()+"/- \n" +
-                                "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
-                                "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
-                                "Your pending Balance: Rs "+balance+"/-\n" +
-                                " ----- JazakAllah -----";
+                        if(milkRate.equals("0")){
+                            txt += "_____________________________________\n\n" +
+                                    "Milk Rate is: Rs "+DashboardActivity.getMilkRate()+"/- \n" +
+                                    "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
+                                    "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
+                                    "Your pending Balance: Rs "+balance+"/-\n" +
+                                    " ----- JazakAllah -----";
+                        } else {
+                            txt += "_____________________________________\n\n" +
+                                    "Milk Rate is: Rs "+milkRate+"/- \n" +
+                                    "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
+                                    "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
+                                    "Your pending Balance: Rs "+balance+"/-\n" +
+                                    " ----- JazakAllah -----";
+                        }
 
                         if(datalist.size() == 0){
                             Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
@@ -396,6 +424,8 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                 cancelBtn = unpaidDialog.findViewById(R.id.cancelBtn);
                 givenAmountLayout = unpaidDialog.findViewById(R.id.givenAmountLayout);
                 givenAmountInput = unpaidDialog.findViewById(R.id.givenAmountInput);
+                paymentMethodLayout = unpaidDialog.findViewById(R.id.paymentMethodLayout);
+                paymentMethodInput = unpaidDialog.findViewById(R.id.paymentMethodInput);
                 totalAmountUnpaid = unpaidDialog.findViewById(R.id.totalAmount);
                 balanceAmountUnpaid = unpaidDialog.findViewById(R.id.balanceAmount);
 
@@ -415,6 +445,15 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
 
                     }
                 });
+
+                ArrayList<String> paymentMethods = new ArrayList<String>();
+                paymentMethods.add("Cash");
+                paymentMethods.add("Bank Transfer");
+                paymentMethods.add("Easy Paisa");
+                paymentMethods.add("Jazz Cash");
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(MonthlySupplyDetailActivity.this, android.R.layout.simple_dropdown_item_1line,paymentMethods);
+                paymentMethodInput.setAdapter(adapter);
 
                 totalAmountUnpaid.setText("Rs "+grandTotalAmount.getText().toString().trim()+"/-");
                 balanceAmountUnpaid.setText("Rs "+balancedAmount.getText().toString().trim()+"/-");
@@ -499,7 +538,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                 } else {
                     reportDialog = new Dialog(MonthlySupplyDetailActivity.this);
                     reportDialog.setContentView(R.layout.dialog_pdf_report);
-                    reportDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                    reportDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT);
                     reportDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                     reportDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
                     reportDialog.getWindow().setGravity(Gravity.CENTER);
@@ -531,6 +570,157 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             }
         });
 
+        deleteAllBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(datalist.size()==0){
+                    Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
+                    alertdialog.setContentView(R.layout.dialog_error);
+                    alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                    alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                    alertdialog.getWindow().setGravity(Gravity.CENTER);
+                    alertdialog.setCancelable(false);
+                    alertdialog.setCanceledOnTouchOutside(false);
+                    TextView message = alertdialog.findViewById(R.id.msgDialog);
+                    message.setText("Data not deleted because no data found!!!");
+                    alertdialog.show();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            alertdialog.dismiss();
+                        }
+                    },3000);
+                } else {
+                    Dialog actiondialog = new Dialog(MonthlySupplyDetailActivity.this);
+                    actiondialog.setContentView(R.layout.dialog_confirm);
+                    actiondialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                    actiondialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+                    actiondialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                    actiondialog.getWindow().setGravity(Gravity.CENTER);
+                    actiondialog.setCancelable(false);
+                    actiondialog.setCanceledOnTouchOutside(false);
+                    Button cancelBtn, yesBtn;
+                    TextView msg;
+                    yesBtn = actiondialog.findViewById(R.id.yesBtn);
+                    cancelBtn = actiondialog.findViewById(R.id.cancelBtn);
+                    msg = actiondialog.findViewById(R.id.message);
+                    msg.setText("Are you sure to delete all data of this month?");
+                    cancelBtn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            actiondialog.dismiss();
+                        }
+                    });
+                    yesBtn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").child(date.getText().toString().trim()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    if(snapshot.exists()){
+                                        double balanced_amount = Double.parseDouble(snapshot.child("balanced_amount").getValue().toString());
+                                        double balance = Double.parseDouble(balancedAmount.getText().toString().trim());
+                                        MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").child(date.getText().toString()).setValue("");
+                                        MainActivity.db.child("Monthly").child(MonthlyId).child("balance").setValue(""+(balance-balanced_amount));
+                                        balancedAmount.setText(""+(balance-balanced_amount));
+                                        Dialog dialog = new Dialog(MonthlySupplyDetailActivity.this);
+                                        dialog.setContentView(R.layout.dialog_success);
+                                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                                        dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                                        dialog.getWindow().setGravity(Gravity.CENTER);
+                                        dialog.setCanceledOnTouchOutside(false);
+                                        dialog.setCancelable(false);
+                                        TextView msg = dialog.findViewById(R.id.msgDialog);
+                                        msg.setText("Deleted Successfully!!!");
+                                        dialog.show();
+
+                                        new Handler().postDelayed(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                dialog.dismiss();
+                                                actiondialog.dismiss();
+                                            }
+                                        },3000);
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
+                        }
+                    });
+                    actiondialog.show();
+                }
+            }
+        });
+
+        milkRateBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                milkRateDialog = new Dialog(MonthlySupplyDetailActivity.this);
+                milkRateDialog.setContentView(R.layout.dialog_milk_rate);
+                milkRateDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                milkRateDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                milkRateDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                milkRateDialog.getWindow().setGravity(Gravity.CENTER);
+                milkRateDialog.setCancelable(false);
+                milkRateDialog.setCanceledOnTouchOutside(false);
+                Button addDataBtn, cancelBtn;
+                addDataBtn = milkRateDialog.findViewById(R.id.addDataBtn);
+                cancelBtn = milkRateDialog.findViewById(R.id.cancelBtn);
+                supplyAmountLayout = milkRateDialog.findViewById(R.id.supplyAmountLayout);
+                supplyAmountInput = milkRateDialog.findViewById(R.id.supplyAmountInput);
+
+                supplyAmountInput.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        supplyAmountValidation();
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+
+                    }
+                });
+
+                supplyAmountInput.setText(milkRate);
+
+                addDataBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        supplyMilkValidation();
+                    }
+                });
+
+                cancelBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        milkRateDialog.dismiss();
+                    }
+                });
+
+                milkRateDialog.show();
+            }
+        });
+
+        billBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MonthlySupplyDetailActivity.this, BillActivity.class);
+                intent.putExtra("MonthlyId",MonthlyId);
+                startActivity(intent);
+            }
+        });
+
         fetchData();
     }
 
@@ -546,16 +736,16 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
     }
 
     public void fetchData(){
-        MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").addValueEventListener(new ValueEventListener() {
+        MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").child(date.getText().toString().trim()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists()){
                     datalist.clear();
                     datalistReports.clear();
                     double grandtotal = 0.0;
-                    int grandqty = 0;
+                    double grandqty = 0.0;
                     for (DataSnapshot ds: snapshot.getChildren()){
-                        if(ds.child("month").getValue().toString().trim().equals(date.getText().toString().trim())){
+                        if(!ds.getKey().equals("balanced_amount")){
                             MonthlyDetailModel model = new MonthlyDetailModel(ds.getKey(),
                                     ds.child("amount").getValue().toString(),
                                     ds.child("qty").getValue().toString(),
@@ -568,7 +758,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                             datalist.add(model);
                             datalistReports.add(model);
                             grandtotal += Double.parseDouble(ds.child("totalAmount").getValue().toString());
-                            grandqty += Integer.parseInt(ds.child("qty").getValue().toString());
+                            grandqty += Double.parseDouble(ds.child("qty").getValue().toString());
                         }
                     }
                     if(datalist.size() > 0){
@@ -618,7 +808,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         selectBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String selectedDate = (datePicker.getMonth()+1)+"/"+datePicker.getYear();
+                String selectedDate = datePicker.getYear()+"/"+(datePicker.getMonth()+1);
                 date.setText(selectedDate);
                 currentMonth = new DateFormatSymbols().getMonths()[datePicker.getMonth()] +", "+datePicker.getYear();
                 currentReportDate = new DateFormatSymbols().getMonths()[datePicker.getMonth()] +", "+datePicker.getYear();
@@ -723,11 +913,28 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             }
         });
 
-        MainActivity.db.child("Users").child(UID).addListenerForSingleValueEvent(new ValueEventListener() {
+        MainActivity.db.child("Monthly").child(MonthlyId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists()){
-                    amountInput.setText(snapshot.child("milkRate").getValue().toString());
+                    String milkRate = snapshot.child("milkRate").getValue().toString();
+                    if(milkRate.equals("0")){
+                        MainActivity.db.child("Users").child(UID).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot datasnapshot) {
+                                if(datasnapshot.exists()){
+                                    amountInput.setText(datasnapshot.child("milkRate").getValue().toString());
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+                    } else {
+                        amountInput.setText(milkRate);
+                    }
                 }
             }
 
@@ -824,7 +1031,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
 
     public boolean qtyValidation(){
         String input = qtyInput.getText().toString().trim();
-        String regex = "^[0-9]*$";
+        String regex = "^[0-9.]*$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
         if(input.equals("")){
@@ -903,7 +1110,6 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         TextView message = alertdialog.findViewById(R.id.msgDialog);
         message.setText("Quantity Added Successfully!!!");
         alertdialog.show();
-
         float amount, qty ,total, itemAmount;
         String balance;
         amount = Float.parseFloat(amountInput.getText().toString().trim());
@@ -913,27 +1119,28 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             itemAmount = Float.parseFloat(itemAmountInput.getText().toString().trim());
             total += itemAmount;
             HashMap<String, String> mydata = new HashMap<String, String>();
-            mydata.put("amount", ""+((Integer.parseInt(qtyInput.getText().toString().trim()))*(Integer.parseInt(amountInput.getText().toString().trim()))));
+            mydata.put("amount", ""+((Double.parseDouble(qtyInput.getText().toString().trim()))*(Double.parseDouble(amountInput.getText().toString().trim()))));
             mydata.put("qty", qtyInput.getText().toString().trim());
             mydata.put("date", dateView.getText().toString().trim());
             mydata.put("month", currentDate);
             mydata.put("itemName", itemNameInput.getText().toString().trim());
             mydata.put("itemAmount", itemAmountInput.getText().toString().trim());
             mydata.put("totalAmount", String.valueOf(total));
-            MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").push().setValue(mydata);
+            MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").child(""+currentDate).push().setValue(mydata);
         } else {
             HashMap<String, String> mydata = new HashMap<String, String>();
-            mydata.put("amount", ""+((Integer.parseInt(qtyInput.getText().toString().trim()))*(Integer.parseInt(amountInput.getText().toString().trim()))));
+            mydata.put("amount", ""+((Double.parseDouble(qtyInput.getText().toString().trim()))*(Double.parseDouble(amountInput.getText().toString().trim()))));
             mydata.put("qty", qtyInput.getText().toString().trim());
             mydata.put("date", dateView.getText().toString().trim());
             mydata.put("month", currentDate);
             mydata.put("itemName", "");
             mydata.put("itemAmount", "0");
             mydata.put("totalAmount", String.valueOf(total));
-            MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").push().setValue(mydata);
+            MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").child(""+currentDate).push().setValue(mydata);
         }
         balance = String.valueOf(Double.parseDouble(balancedAmount.getText().toString().trim()) + Double.parseDouble(String.valueOf(total)));
         MainActivity.db.child("Monthly").child(MonthlyId).child("balance").setValue(balance);
+        MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").child(""+currentDate).child("balanced_amount").setValue(balance);
         balancedAmount.setText(balance);
 
         new Handler().postDelayed(new Runnable() {
@@ -962,10 +1169,39 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         }
     }
 
+    public boolean paymentMethodValidation(){
+        String input = paymentMethodInput.getText().toString().trim();
+        if(input.equals("")){
+            paymentMethodLayout.setError("Payment Method is Required!!!");
+            return false;
+        } else {
+            paymentMethodLayout.setError(null);
+            return true;
+        }
+    }
+
+    public boolean supplyAmountValidation(){
+        String input = supplyAmountInput.getText().toString().trim();
+        String regex = "^[0-9]*$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+        if(input.equals("")){
+            supplyAmountLayout.setError("Amount is Required!!!");
+            return false;
+        } else if(!matcher.matches()){
+            supplyAmountLayout.setError("Only Digits Allowed!!!");
+            return false;
+        } else {
+            supplyAmountLayout.setError(null);
+            return true;
+        }
+    }
+
     private void unpaidValidation() {
-        boolean givenAmountErr = false;
+        boolean givenAmountErr = false, paymentMethodErr = false;
         givenAmountErr = givenAmountValidation();
-        if((givenAmountErr) == true){
+        paymentMethodErr = paymentMethodValidation();
+        if((givenAmountErr && paymentMethodErr) == true){
 
             double totalAmount = Double.parseDouble(grandTotalAmount.getText().toString().trim());
             double balance = Double.parseDouble(balancedAmount.getText().toString().trim());
@@ -993,6 +1229,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                 balancedAmount.setText(mybalance);
                 balanceAmountUnpaid.setText(mybalance);
                 MainActivity.db.child("Monthly").child(MonthlyId).child("balance").setValue(mybalance);
+                MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").child(date.getText().toString().trim()).child("balanced_amount").setValue(mybalance);
                 Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
                 alertdialog.setContentView(R.layout.dialog_success);
                 alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -1004,6 +1241,32 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                 TextView message = alertdialog.findViewById(R.id.msgDialog);
                 message.setText("Paid Successfully!!!");
                 alertdialog.show();
+
+                //date picker start
+                Calendar calendar = Calendar.getInstance();
+                String[] dateArray = date.getText().toString().split("/");
+                int month = Integer.parseInt(dateArray[1]);
+                int year = Integer.parseInt(dateArray[0]);
+                String[] months = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+                //date picker end
+
+                HashMap<String, String> mydata = new HashMap<String, String>();
+                mydata.put("userId", UID);
+                mydata.put("userPerson", MonthlyId);
+                mydata.put("name", personName);
+                mydata.put("contact", contact);
+                mydata.put("milkRate", ""+(milkRate.equals("0")?DashboardActivity.getMilkRate():milkRate));
+                mydata.put("paymentMethod", paymentMethodInput.getText().toString());
+                mydata.put("totalAmount", grandTotalAmount.getText().toString().trim());
+                mydata.put("givenAmount", ""+Float.parseFloat(givenAmountInput.getText().toString()));
+                mydata.put("totalQty", totalQty.getText().toString().trim());
+                mydata.put("balanceAmount", mybalance);
+                mydata.put("from", "01/"+String.format("%02d",month)+"/"+year);
+                mydata.put("to", ""+getLastMonthDate("01/"+String.format("%02d",month)+"/"+year, "dd/MM/yyyy", "dd/MM/yyyy"));
+                mydata.put("month", ""+months[(month-1)]);
+                mydata.put("date", ""+new SimpleDateFormat("dd/MM/yyyy").format(calendar.getTime()));
+                MainActivity.db.child("PaidReport").push().setValue(mydata);
+
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -1016,12 +1279,66 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
 
     }
 
+    public static String getLastMonthDate(String givenDate, String inputFormat, String outputFormat) {
+        SimpleDateFormat inputDateFormat = new SimpleDateFormat(inputFormat, Locale.getDefault());
+        SimpleDateFormat outputDateFormat = new SimpleDateFormat(outputFormat, Locale.getDefault());
+
+        try {
+            // Parse the given date
+            Date date = inputDateFormat.parse(givenDate);
+
+            // Get a Calendar instance
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+
+            // Set the date to the last day of the month
+            calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+
+            // Get the last day of the month
+            Date lastDayOfMonth = calendar.getTime();
+
+            // Format the date as needed
+            return outputDateFormat.format(lastDayOfMonth);
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private void supplyMilkValidation() {
+        boolean supplyAmountErr = false;
+        supplyAmountErr = supplyAmountValidation();
+
+        if((supplyAmountErr) == true){
+            MainActivity.db.child("Monthly").child(MonthlyId).child("milkRate").setValue(supplyAmountInput.getText().toString().trim());
+            Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
+            alertdialog.setContentView(R.layout.dialog_success);
+            alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+            alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+            alertdialog.getWindow().setGravity(Gravity.CENTER);
+            alertdialog.setCancelable(false);
+            alertdialog.setCanceledOnTouchOutside(false);
+            TextView message = alertdialog.findViewById(R.id.msgDialog);
+            message.setText("Set Supply Milk Rate Successfully!!!");
+            alertdialog.show();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    alertdialog.dismiss();
+                    milkRateDialog.dismiss();
+                }
+            },2000);
+        }
+    }
+
     public void totalAmountDialog(){
         if(itemNameInput.getText().toString().trim().equals("")){
-            int total = Integer.parseInt("0"+qtyInput.getText().toString().trim())*Integer.parseInt("0"+amountInput.getText().toString().trim());
+            double total = Double.parseDouble("0"+qtyInput.getText().toString().trim())*Double.parseDouble("0"+amountInput.getText().toString().trim());
             totalAmountDialog.setText("Rs "+total+"/-");
         } else {
-            int total = Integer.parseInt("0"+qtyInput.getText().toString().trim())*Integer.parseInt("0"+amountInput.getText().toString().trim())+Integer.parseInt("0"+itemAmountInput.getText().toString().trim());
+            double total = Double.parseDouble("0"+qtyInput.getText().toString().trim())*Double.parseDouble("0"+amountInput.getText().toString().trim())+Double.parseDouble("0"+itemAmountInput.getText().toString().trim());
             totalAmountDialog.setText("Rs "+total+"/-");
         }
     }
@@ -1190,7 +1507,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                 Table summaryContentTable = new Table(UnitValue.createPercentArray(new float[]{1, 1, 1, 1}))
                         .useAllAvailableWidth()
                         .setMarginBottom(25);
-                summaryContentTable.addCell(new Cell().add(new Paragraph("Rs "+DashboardActivity.getMilkRate())
+                summaryContentTable.addCell(new Cell().add(new Paragraph("Rs "+(milkRate.equals("0")?DashboardActivity.getMilkRate():milkRate))
                         .setFont(fontBold)
                         .setFontSize(12)
                         .setTextAlignment(TextAlignment.LEFT)
@@ -1467,7 +1784,9 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             File file = new File(path);
             Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".provider", file);
             intent.putExtra(Intent.EXTRA_STREAM, uri);
-            startActivity(Intent.createChooser(intent, "Share PDF"));
+            intent.setPackage("com.whatsapp");
+            startActivity(intent);
+//            startActivity(Intent.createChooser(intent, "Share PDF"));
         }
     }
 
@@ -1519,12 +1838,12 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         @Override
         public View getView(int i, View convertView, ViewGroup parent) {
             View customListItem = LayoutInflater.from(context).inflate(R.layout.monthly_supply_custom_listview,null);
-            TextView sno, date, qty, amount, itemName, itemAmount;
+            TextView sno, dateText, qty, amount, itemName, itemAmount;
             ImageView delete;
             LinearLayout itemContainer;
 
             sno = customListItem.findViewById(R.id.sno);
-            date = customListItem.findViewById(R.id.date);
+            dateText = customListItem.findViewById(R.id.date);
             qty = customListItem.findViewById(R.id.qty);
             amount = customListItem.findViewById(R.id.amount);
             delete = customListItem.findViewById(R.id.delete);
@@ -1533,7 +1852,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             itemAmount = customListItem.findViewById(R.id.itemAmount);
 
             sno.setText(""+(i+1));
-            date.setText(data.get(i).getDate());
+            dateText.setText(data.get(i).getDate());
             qty.setText(data.get(i).getQty()+"kg");
             amount.setText("Rs "+data.get(i).getAmount()+"/-");
             itemName.setText(data.get(i).getItemName());
@@ -1572,7 +1891,12 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                             double balance = Double.parseDouble(balancedAmount.getText().toString().trim());
 
                             if(totalAmount<=balance){
-                                MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").child(data.get(i).getId()).removeValue();
+                                if(datalist.size() < 2){
+                                    MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").child(date.getText().toString()).setValue("");
+                                } else {
+                                    MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").child(date.getText().toString()).child("balanced_amount").setValue(""+(balance-totalAmount));
+                                    MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").child(date.getText().toString()).child(data.get(i).getId()).removeValue();
+                                }
                                 MainActivity.db.child("Monthly").child(MonthlyId).child("balance").setValue(""+(balance-totalAmount));
                                 balancedAmount.setText(""+(balance-totalAmount));
                                 Dialog dialog = new Dialog(context);

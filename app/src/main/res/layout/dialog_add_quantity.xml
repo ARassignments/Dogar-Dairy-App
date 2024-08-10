@@ -49,7 +49,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
                     app:endIconMode="clear_text"
-                    app:counterMaxLength="3"
+                    app:counterMaxLength="4"
                     app:helperText="Only Digits Allowed"
                     android:hint="Quantity Here..."
                     app:suffixText="kg"
@@ -59,8 +59,8 @@
                         android:id="@+id/qtyInput"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="number"
-                        android:maxLength="3"
+                        android:inputType="numberDecimal"
+                        android:maxLength="4"
                         style="@style/inputTextEditMaterial"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
