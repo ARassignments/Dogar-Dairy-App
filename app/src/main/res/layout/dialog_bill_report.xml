@@ -6,6 +6,17 @@
     android:orientation="vertical"
     android:background="@color/transparent">
 
+    <Button
+        android:id="@+id/modifyBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Modify"
+        android:layout_gravity="end"
+        android:drawableEnd="@drawable/edit"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="-10dp"
+        style="@style/customButton"/>
+
     <FrameLayout
         android:id="@+id/billLayout"
         android:layout_width="match_parent"
@@ -359,7 +370,7 @@
             android:id="@+id/cancelBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
+            android:layout_weight="1"
             android:text="Cancel"
             style="@style/logoutButton"/>
 

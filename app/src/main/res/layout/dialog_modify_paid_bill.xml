@@ -29,49 +29,25 @@
                     android:id="@+id/title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Unpaid"
+                    android:text="Modify Bill"
                     android:textAlignment="center"
                     android:layout_marginBottom="20dp"
                     style="@style/authTitle"/>
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/givenAmountLayout"
+                    android:id="@+id/monthLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    app:endIconMode="clear_text"
-                    app:counterMaxLength="8"
-                    app:helperText="Only Digits Allowed"
-                    android:hint="Given Amount Here..."
-                    app:prefixText="Rs "
-                    app:suffixText="/-"
-                    style="@style/inputTextMaterial">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/givenAmountInput"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="number"
-                        android:maxLength="8"
-                        style="@style/inputTextEditMaterial"/>
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/paymentMethodLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
                     app:endIconMode="dropdown_menu"
                     app:counterMaxLength="0"
                     app:counterEnabled="false"
                     app:helperText=""
                     helperTextEnabled="false"
-                    android:hint="Payment Method Here..."
+                    android:hint="Select Month..."
                     style="@style/inputTextMaterial">
 
                     <AutoCompleteTextView
-                        android:id="@+id/paymentMethodInput"
+                        android:id="@+id/monthInput"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textPersonName"
@@ -85,51 +61,6 @@
                         style="@style/inputTextEditMaterial"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Total Amount:"
-                        android:textAlignment="textEnd"
-                        android:layout_weight="1"
-                        android:layout_marginRight="8dp"
-                        style="@style/appBarText"/>
-
-                    <TextView
-                        android:id="@+id/totalAmount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Rs 0/-"
-                        style="@style/authLabel"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Total Balance:"
-                        android:textAlignment="textEnd"
-                        android:layout_weight="1"
-                        android:layout_marginRight="8dp"
-                        style="@style/appBarText"/>
-
-                    <TextView
-                        android:id="@+id/balanceAmount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Rs 0/-"
-                        style="@style/authLabel"/>
-
-                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"

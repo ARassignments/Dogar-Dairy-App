@@ -162,7 +162,7 @@ public class MonthlySupplyActivity extends AppCompatActivity {
     }
 
     public void fetchData(String data){
-        MainActivity.db.child("Monthly").addValueEventListener(new ValueEventListener() {
+        MainActivity.db.child("Monthly").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists()){
@@ -421,6 +421,7 @@ public class MonthlySupplyActivity extends AppCompatActivity {
                 public void run() {
                     alertdialog.dismiss();
                     personDialog.dismiss();
+                    fetchData("");
                 }
             },2000);
         }
@@ -573,6 +574,7 @@ public class MonthlySupplyActivity extends AppCompatActivity {
                                             dialog.dismiss();
                                             actiondialog.dismiss();
                                             loaddialog.dismiss();
+                                            fetchData("");
                                         }
                                     },3000);
                                 }
@@ -608,7 +610,7 @@ public class MonthlySupplyActivity extends AppCompatActivity {
                 customListItem.setPadding(customListItem.getPaddingLeft(), 0,customListItem.getPaddingRight(), 0);
             }
             customListItem.setAlpha(0f);
-            customListItem.animate().alpha(1f).setDuration(300).setStartDelay(i * 2).start();
+            customListItem.animate().alpha(1f).setDuration(200).setStartDelay(i * 2).start();
 
 
             return customListItem;

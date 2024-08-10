@@ -16,11 +16,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -43,6 +47,7 @@ import com.example.dogardairy.MainActivity;
 import com.example.dogardairy.Models.BillModel;
 import com.example.dogardairy.Models.MonthlyDetailModel;
 import com.example.dogardairy.R;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -215,8 +220,6 @@ public class BillActivity extends AppCompatActivity {
 //        startActivity(Intent.createChooser(shareIntent, "Share Image"));
     }
 
-
-
     class MyAdapter extends BaseAdapter {
 
         Context context;
@@ -271,10 +274,11 @@ public class BillActivity extends AppCompatActivity {
                     actiondialog.getWindow().setGravity(Gravity.CENTER);
                     actiondialog.setCancelable(false);
                     actiondialog.setCanceledOnTouchOutside(false);
-                    Button cancelBtn, shareBtn;
+                    Button cancelBtn, shareBtn, modifyBtn;
                     TextView date, month, name, contact, from, to, milkRate, paymentMethod, totalQty, totalAmount, balanceAmount, givenAmount;
                     shareBtn = actiondialog.findViewById(R.id.shareBtn);
                     cancelBtn = actiondialog.findViewById(R.id.cancelBtn);
+                    modifyBtn = actiondialog.findViewById(R.id.modifyBtn);
                     date = actiondialog.findViewById(R.id.date);
                     month = actiondialog.findViewById(R.id.month);
                     name = actiondialog.findViewById(R.id.name);
@@ -319,6 +323,82 @@ public class BillActivity extends AppCompatActivity {
                                 throw new RuntimeException(e);
                             }
                             shareImage(imageFile,data.get(i).getContact());
+                        }
+                    });
+
+                    modifyBtn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Dialog modifyDialog = new Dialog(context);
+                            modifyDialog.setContentView(R.layout.dialog_modify_paid_bill);
+                            modifyDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                            modifyDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                            modifyDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                            modifyDialog.getWindow().setGravity(Gravity.CENTER);
+                            modifyDialog.setCancelable(false);
+                            modifyDialog.setCanceledOnTouchOutside(false);
+                            Button addDataBtn, cancelBtn;
+                            TextInputLayout monthLayout;
+                            AutoCompleteTextView monthInput;
+                            addDataBtn = modifyDialog.findViewById(R.id.addDataBtn);
+                            cancelBtn = modifyDialog.findViewById(R.id.cancelBtn);
+                            monthLayout = modifyDialog.findViewById(R.id.monthLayout);
+                            monthInput = modifyDialog.findViewById(R.id.monthInput);
+
+                            monthInput.setText(data.get(i).getMonth());
+
+                            ArrayList<String> monthsList = new ArrayList<String>();
+                            monthsList.add("January");
+                            monthsList.add("February");
+                            monthsList.add("March");
+                            monthsList.add("April");
+                            monthsList.add("May");
+                            monthsList.add("June");
+                            monthsList.add("July");
+                            monthsList.add("August");
+                            monthsList.add("September");
+                            monthsList.add("October");
+                            monthsList.add("November");
+                            monthsList.add("December");
+
+                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, android.R.layout.simple_dropdown_item_1line,monthsList);
+                            monthInput.setAdapter(adapter);
+
+                            addDataBtn.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    MainActivity.db.child("PaidReport").child(data.get(i).getId()).child("month").setValue(monthInput.getText().toString());
+                                    month.setText(monthInput.getText().toString()+" Paid Bill");
+                                    Dialog dialog = new Dialog(context);
+                                    dialog.setContentView(R.layout.dialog_success);
+                                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                    dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                                    dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                                    dialog.getWindow().setGravity(Gravity.CENTER);
+                                    dialog.setCanceledOnTouchOutside(false);
+                                    dialog.setCancelable(false);
+                                    TextView msg = dialog.findViewById(R.id.msgDialog);
+                                    msg.setText("Updated Successfully!!!");
+                                    dialog.show();
+
+                                    new Handler().postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            dialog.dismiss();
+                                            modifyDialog.dismiss();
+                                        }
+                                    },2000);
+                                }
+                            });
+
+                            cancelBtn.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    modifyDialog.dismiss();
+                                }
+                            });
+
+                            modifyDialog.show();
                         }
                     });
 
@@ -375,7 +455,7 @@ public class BillActivity extends AppCompatActivity {
                                     dialog.dismiss();
                                     actiondialog.dismiss();
                                 }
-                            },3000);
+                            },2000);
                         }
                     });
 

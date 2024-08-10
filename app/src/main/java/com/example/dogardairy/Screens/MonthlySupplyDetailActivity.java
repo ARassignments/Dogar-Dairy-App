@@ -762,6 +762,45 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                         }
                     }
                     if(datalist.size() > 0){
+                        // Sort by date using the date string from the data snapshot
+                        Collections.sort(datalist, new Comparator<MonthlyDetailModel>() {
+                            @Override
+                            public int compare(MonthlyDetailModel o1, MonthlyDetailModel o2) {
+                                String date1Str = o1.getDate(); // Assuming o1.getDate() returns the date string
+                                String date2Str = o2.getDate(); // Assuming o2.getDate() returns the date string
+
+                                // Define the date format
+                                SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM", Locale.getDefault());
+                                try {
+                                    Date date1 = dateFormat.parse(date1Str);
+                                    Date date2 = dateFormat.parse(date2Str);
+                                    return date1.compareTo(date2);
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                    return 0;
+                                }
+                            }
+                        });
+
+                        Collections.sort(datalistReports, new Comparator<MonthlyDetailModel>() {
+                            @Override
+                            public int compare(MonthlyDetailModel o1, MonthlyDetailModel o2) {
+                                String date1Str = o1.getDate(); // Assuming o1.getDate() returns the date string
+                                String date2Str = o2.getDate(); // Assuming o2.getDate() returns the date string
+
+                                // Define the date format
+                                SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM", Locale.getDefault());
+                                try {
+                                    Date date1 = dateFormat.parse(date1Str);
+                                    Date date2 = dateFormat.parse(date2Str);
+                                    return date1.compareTo(date2);
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                    return 0;
+                                }
+                            }
+                        });
+
                         listView.setVisibility(View.VISIBLE);
                         notfoundContainer.setVisibility(View.GONE);
                         if(sortingStatus.equals("dsc")){
@@ -1149,7 +1188,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                 alertdialog.dismiss();
                 addQtyDialog.dismiss();
             }
-        },2000);
+        },1000);
     }
 
     public boolean givenAmountValidation(){
@@ -1403,6 +1442,16 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             msg.setText("PDF generating in process!!!");
             loaderDialog.show();
 
+            //date picker start
+            Calendar calendar = Calendar.getInstance();
+            String[] dateArray = date.getText().toString().split("/");
+            int month = Integer.parseInt(dateArray[1]);
+            int year = Integer.parseInt(dateArray[0]);
+            String[] months = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+            //date picker end
+
+            String lastDate = getLastMonthDate("01/"+String.format("%02d",month)+"/"+year, "dd/MM/yyyy", "dd MMMM yyyy");
+
             try {
                 PdfWriter writer = new PdfWriter(path);
                 PdfDocument pdfDocument = new PdfDocument(writer);
@@ -1453,7 +1502,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                         .setFontColor(new DeviceRgb(0x4C, 0x4C, 0x4C));
                 document.add(clientContact);
 
-                Paragraph reportDate = new Paragraph("1st "+currentReportDate+" - 30th "+currentReportDate)
+                Paragraph reportDate = new Paragraph("1st "+months[month-1]+" "+year+" - "+lastDate)
                         .setFont(fontMedium)
                         .setFontSize(10)
                         .setTextAlignment(TextAlignment.LEFT)
@@ -1950,7 +1999,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                 customListItem.setPadding(customListItem.getPaddingLeft(), 0,customListItem.getPaddingRight(), 0);
             }
             customListItem.setAlpha(0f);
-            customListItem.animate().alpha(1f).setDuration(500).setStartDelay(i * 2).start();
+            customListItem.animate().alpha(1f).setDuration(200).setStartDelay(i * 2).start();
 
             return customListItem;
         }
