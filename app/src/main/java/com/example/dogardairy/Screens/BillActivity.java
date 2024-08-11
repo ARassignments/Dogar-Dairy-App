@@ -55,10 +55,14 @@ import com.google.firebase.database.ValueEventListener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
 
 public class BillActivity extends AppCompatActivity {
 
@@ -220,6 +224,33 @@ public class BillActivity extends AppCompatActivity {
 //        startActivity(Intent.createChooser(shareIntent, "Share Image"));
     }
 
+    public static String getLastMonthDate(String givenDate, String inputFormat, String outputFormat) {
+        SimpleDateFormat inputDateFormat = new SimpleDateFormat(inputFormat, Locale.getDefault());
+        SimpleDateFormat outputDateFormat = new SimpleDateFormat(outputFormat, Locale.getDefault());
+
+        try {
+            // Parse the given date
+            Date date = inputDateFormat.parse(givenDate);
+
+            // Get a Calendar instance
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+
+            // Set the date to the last day of the month
+            calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+
+            // Get the last day of the month
+            Date lastDayOfMonth = calendar.getTime();
+
+            // Format the date as needed
+            return outputDateFormat.format(lastDayOfMonth);
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     class MyAdapter extends BaseAdapter {
 
         Context context;
@@ -338,14 +369,21 @@ public class BillActivity extends AppCompatActivity {
                             modifyDialog.setCancelable(false);
                             modifyDialog.setCanceledOnTouchOutside(false);
                             Button addDataBtn, cancelBtn;
-                            TextInputLayout monthLayout;
-                            AutoCompleteTextView monthInput;
+                            TextInputLayout monthLayout, yearLayout;
+                            AutoCompleteTextView monthInput, yearInput;
                             addDataBtn = modifyDialog.findViewById(R.id.addDataBtn);
                             cancelBtn = modifyDialog.findViewById(R.id.cancelBtn);
                             monthLayout = modifyDialog.findViewById(R.id.monthLayout);
                             monthInput = modifyDialog.findViewById(R.id.monthInput);
+                            yearLayout = modifyDialog.findViewById(R.id.yearLayout);
+                            yearInput = modifyDialog.findViewById(R.id.yearInput);
+
+                            //date picker start
+                            Calendar calendar = Calendar.getInstance();
+                            String currentYear = new SimpleDateFormat("yyyy").format(calendar.getTime());
 
                             monthInput.setText(data.get(i).getMonth());
+                            yearInput.setText(currentYear);
 
                             ArrayList<String> monthsList = new ArrayList<String>();
                             monthsList.add("January");
@@ -361,14 +399,48 @@ public class BillActivity extends AppCompatActivity {
                             monthsList.add("November");
                             monthsList.add("December");
 
-                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, android.R.layout.simple_dropdown_item_1line,monthsList);
-                            monthInput.setAdapter(adapter);
+                            ArrayAdapter<String> adapterMonth = new ArrayAdapter<String>(context, android.R.layout.simple_dropdown_item_1line,monthsList);
+                            monthInput.setAdapter(adapterMonth);
+
+                            ArrayList<String> yearList = new ArrayList<String>();
+                            yearList.add("2024");
+                            yearList.add("2025");
+                            yearList.add("2026");
+                            yearList.add("2027");
+                            yearList.add("2028");
+                            yearList.add("2029");
+                            yearList.add("2030");
+
+                            ArrayAdapter<String> adapterYear = new ArrayAdapter<String>(context, android.R.layout.simple_dropdown_item_1line,yearList);
+                            yearInput.setAdapter(adapterYear);
+
+                            HashMap<String,String> monthsToNumber = new HashMap<>();
+                            monthsToNumber.put("January","01");
+                            monthsToNumber.put("February","02");
+                            monthsToNumber.put("March","03");
+                            monthsToNumber.put("April","04");
+                            monthsToNumber.put("May","05");
+                            monthsToNumber.put("June","06");
+                            monthsToNumber.put("July","07");
+                            monthsToNumber.put("August","08");
+                            monthsToNumber.put("September","09");
+                            monthsToNumber.put("October","10");
+                            monthsToNumber.put("November","11");
+                            monthsToNumber.put("December","12");
+
+                            String fromDate = "01/"+monthsToNumber.get(monthInput.getText().toString())+"/"+yearInput.getText().toString();
+                            String toDate = getLastMonthDate(fromDate, "dd/MM/yyyy", "dd/MM/yyyy");
 
                             addDataBtn.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
                                     MainActivity.db.child("PaidReport").child(data.get(i).getId()).child("month").setValue(monthInput.getText().toString());
+                                    MainActivity.db.child("PaidReport").child(data.get(i).getId()).child("from").setValue(fromDate);
+                                    MainActivity.db.child("PaidReport").child(data.get(i).getId()).child("to").setValue(toDate);
                                     month.setText(monthInput.getText().toString()+" Paid Bill");
+                                    from.setText(fromDate);
+                                    to.setText(toDate);
+
                                     Dialog dialog = new Dialog(context);
                                     dialog.setContentView(R.layout.dialog_success);
                                     dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
