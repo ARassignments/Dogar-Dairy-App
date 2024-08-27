@@ -1,7 +1,5 @@
 package com.example.dogardairy.Screens;
 
-import static com.itextpdf.io.font.FontProgramFactory.*;
-
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -19,7 +17,6 @@ import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,7 +32,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -43,26 +39,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.example.dogardairy.MainActivity;
 import android.Manifest;
 import com.example.dogardairy.Models.ItemsModel;
 import com.example.dogardairy.Models.MonthlyDetailModel;
-import com.example.dogardairy.Models.MonthlyModel;
 import com.example.dogardairy.R;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.itextpdf.io.font.FontProgramFactory;
-import com.itextpdf.io.font.PdfEncodings;
-import com.itextpdf.io.font.constants.StandardFonts;
-import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
@@ -71,11 +59,9 @@ import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.borders.SolidBorder;
-import com.itextpdf.layout.element.AreaBreak;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
-import com.itextpdf.layout.properties.AreaBreakType;
 import com.itextpdf.layout.properties.BorderRadius;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
@@ -83,11 +69,7 @@ import com.itextpdf.layout.properties.VerticalAlignment;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -98,11 +80,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MonthlySupplyDetailActivity extends AppCompatActivity {
 
@@ -114,7 +93,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
     ListView listView;
     LinearLayout notfoundContainer;
     TextView totalQty, grandTotalAmount, balancedAmount, date, appBarTitle;
-    ImageView sendMessageBtn, sortBtn, callBtn, fullListBtn, deleteAllBtn, milkRateBtn, billBtn;
+    ImageView sendMessageBtn, sortBtn, callBtn, fullListBtn, deleteAllBtn, milkRateBtn, billBtn, moreMenuBtn;
     FrameLayout sendWhatsappMessageBtn;
     Button addQuantityBtn, unpaidBtn;
     ArrayList<MonthlyDetailModel> datalist = new ArrayList<>();
@@ -122,10 +101,10 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
     ArrayList<ItemsModel> datalistItems = new ArrayList<>();
 
     //    Dialog Elements
-    Dialog addQtyDialog, unpaidDialog, itemsDialog, loaderDialog, reportDialog, milkRateDialog;
+    Dialog addQtyDialog, unpaidDialog, itemsDialog, loaderDialog, reportDialog, milkRateDialog, balanceDialog;
     TextView dateView, totalAmountUnpaid, balanceAmountUnpaid, totalAmountDialog;
-    TextInputEditText qtyInput, amountInput, itemNameInput, itemAmountInput, givenAmountInput, supplyAmountInput;
-    TextInputLayout qtyLayout, amountLayout, itemNameLayout, itemAmountLayout, givenAmountLayout, paymentMethodLayout, supplyAmountLayout;
+    TextInputEditText qtyInput, amountInput, itemNameInput, itemAmountInput, givenAmountInput, supplyAmountInput, balanceInput;
+    TextInputLayout qtyLayout, amountLayout, itemNameLayout, itemAmountLayout, givenAmountLayout, paymentMethodLayout, supplyAmountLayout, balanceLayout;
     AutoCompleteTextView paymentMethodInput;
 
     @Override
@@ -155,6 +134,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         deleteAllBtn = findViewById(R.id.deleteAllBtn);
         milkRateBtn = findViewById(R.id.milkRateBtn);
         billBtn = findViewById(R.id.billBtn);
+        moreMenuBtn = findViewById(R.id.moreMenuBtn);
 
         if(!sharedPreferences.getString("UID","").equals("")){
             UID = sharedPreferences.getString("UID","").toString();
@@ -661,54 +641,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         milkRateBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                milkRateDialog = new Dialog(MonthlySupplyDetailActivity.this);
-                milkRateDialog.setContentView(R.layout.dialog_milk_rate);
-                milkRateDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-                milkRateDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                milkRateDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-                milkRateDialog.getWindow().setGravity(Gravity.CENTER);
-                milkRateDialog.setCancelable(false);
-                milkRateDialog.setCanceledOnTouchOutside(false);
-                Button addDataBtn, cancelBtn;
-                addDataBtn = milkRateDialog.findViewById(R.id.addDataBtn);
-                cancelBtn = milkRateDialog.findViewById(R.id.cancelBtn);
-                supplyAmountLayout = milkRateDialog.findViewById(R.id.supplyAmountLayout);
-                supplyAmountInput = milkRateDialog.findViewById(R.id.supplyAmountInput);
-
-                supplyAmountInput.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-                    }
-
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        supplyAmountValidation();
-                    }
-
-                    @Override
-                    public void afterTextChanged(Editable s) {
-
-                    }
-                });
-
-                supplyAmountInput.setText(milkRate);
-
-                addDataBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        supplyMilkValidation();
-                    }
-                });
-
-                cancelBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        milkRateDialog.dismiss();
-                    }
-                });
-
-                milkRateDialog.show();
+                milkRateInitial();
             }
         });
 
@@ -721,7 +654,183 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             }
         });
 
+        moreMenuBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Dialog moreMenuDialog = new Dialog(MonthlySupplyDetailActivity.this);
+                moreMenuDialog.setContentView(R.layout.dialog_side_menu);
+                moreMenuDialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                moreMenuDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                moreMenuDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimationRight;
+                moreMenuDialog.getWindow().setGravity(Gravity.CENTER_VERTICAL|Gravity.END);
+                moreMenuDialog.setCancelable(true);
+                moreMenuDialog.setCanceledOnTouchOutside(true);
+                moreMenuDialog.findViewById(R.id.callBtn).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(Intent.ACTION_DIAL);
+                        intent.setData(Uri.parse("tel:" + contact));
+                        startActivity(intent);
+                        moreMenuDialog.dismiss();
+                    }
+                });
+
+                moreMenuDialog.findViewById(R.id.milkRateBtn).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        milkRateInitial();
+                        moreMenuDialog.dismiss();
+                    }
+                });
+
+                moreMenuDialog.findViewById(R.id.billBtn).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(MonthlySupplyDetailActivity.this, BillActivity.class);
+                        intent.putExtra("MonthlyId",MonthlyId);
+                        startActivity(intent);
+                        moreMenuDialog.dismiss();
+                    }
+                });
+
+                moreMenuDialog.findViewById(R.id.balanceBtn).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        balanceInitial();
+                        moreMenuDialog.dismiss();
+                    }
+                });
+                moreMenuDialog.show();
+            }
+        });
+
         fetchData();
+    }
+
+    public void milkRateInitial(){
+        milkRateDialog = new Dialog(MonthlySupplyDetailActivity.this);
+        milkRateDialog.setContentView(R.layout.dialog_milk_rate);
+        milkRateDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+        milkRateDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        milkRateDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+        milkRateDialog.getWindow().setGravity(Gravity.CENTER);
+        milkRateDialog.setCancelable(false);
+        milkRateDialog.setCanceledOnTouchOutside(false);
+        Button addDataBtn, cancelBtn;
+        addDataBtn = milkRateDialog.findViewById(R.id.addDataBtn);
+        cancelBtn = milkRateDialog.findViewById(R.id.cancelBtn);
+        supplyAmountLayout = milkRateDialog.findViewById(R.id.supplyAmountLayout);
+        supplyAmountInput = milkRateDialog.findViewById(R.id.supplyAmountInput);
+
+        supplyAmountInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                supplyAmountValidation();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        MainActivity.db.child("Monthly").child(MonthlyId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    supplyAmountInput.setText(snapshot.child("milkRate").getValue().toString());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        addDataBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                supplyMilkValidation();
+            }
+        });
+
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                milkRateDialog.dismiss();
+            }
+        });
+
+        milkRateDialog.show();
+    }
+
+    public void balanceInitial(){
+        balanceDialog = new Dialog(MonthlySupplyDetailActivity.this);
+        balanceDialog.setContentView(R.layout.dialog_balance);
+        balanceDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+        balanceDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        balanceDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+        balanceDialog.getWindow().setGravity(Gravity.CENTER);
+        balanceDialog.setCancelable(false);
+        balanceDialog.setCanceledOnTouchOutside(false);
+        Button addDataBtn, cancelBtn;
+        addDataBtn = balanceDialog.findViewById(R.id.addDataBtn);
+        cancelBtn = balanceDialog.findViewById(R.id.cancelBtn);
+        balanceLayout = balanceDialog.findViewById(R.id.balanceLayout);
+        balanceInput = balanceDialog.findViewById(R.id.balanceInput);
+
+        balanceInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                balanceAmountValidation();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        MainActivity.db.child("Monthly").child(MonthlyId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    balanceInput.setText(snapshot.child("balance").getValue().toString());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        addDataBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                balanceValidation();
+            }
+        });
+
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                balanceDialog.dismiss();
+            }
+        });
+
+        balanceDialog.show();
     }
 
     public void sorting(){
@@ -1236,6 +1345,23 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         }
     }
 
+    public boolean balanceAmountValidation(){
+        String input = balanceInput.getText().toString().trim();
+        String regex = "^[0-9.]*$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+        if(input.equals("")){
+            balanceLayout.setError("Amount is Required!!!");
+            return false;
+        } else if(!matcher.matches()){
+            balanceLayout.setError("Only Digits Allowed!!!");
+            return false;
+        } else {
+            balanceLayout.setError(null);
+            return true;
+        }
+    }
+
     private void unpaidValidation() {
         boolean givenAmountErr = false, paymentMethodErr = false;
         givenAmountErr = givenAmountValidation();
@@ -1367,6 +1493,34 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                 public void run() {
                     alertdialog.dismiss();
                     milkRateDialog.dismiss();
+                }
+            },2000);
+        }
+    }
+
+    private void balanceValidation() {
+        boolean balanceErr = false;
+        balanceErr = balanceAmountValidation();
+
+        if((balanceErr) == true){
+            MainActivity.db.child("Monthly").child(MonthlyId).child("balance").setValue(balanceInput.getText().toString().trim());
+            balancedAmount.setText(balanceInput.getText().toString().trim());
+            Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
+            alertdialog.setContentView(R.layout.dialog_success);
+            alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+            alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+            alertdialog.getWindow().setGravity(Gravity.CENTER);
+            alertdialog.setCancelable(false);
+            alertdialog.setCanceledOnTouchOutside(false);
+            TextView message = alertdialog.findViewById(R.id.msgDialog);
+            message.setText("Modify Balance Successfully!!!");
+            alertdialog.show();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    alertdialog.dismiss();
+                    balanceDialog.dismiss();
                 }
             },2000);
         }

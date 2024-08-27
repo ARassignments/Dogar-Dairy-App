@@ -30,6 +30,8 @@
             android:layout_marginTop="2dp"
             android:layout_weight="1"
             android:textAlignment="textStart"
+            android:ellipsize="end"
+            android:maxLines="1"
             style="@style/appBarTitle"/>
 
         <TextView
@@ -46,6 +48,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/call"
             android:layout_marginStart="10dp"
+            android:visibility="gone"
             style="@style/appBarIcon"/>
 
         <ImageView
@@ -54,6 +57,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/rate"
             android:layout_marginStart="10dp"
+            android:visibility="gone"
             style="@style/appBarIcon"/>
 
         <ImageView
@@ -61,6 +65,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/bill"
+            android:layout_marginStart="10dp"
+            android:visibility="gone"
+            style="@style/appBarIcon"/>
+
+        <ImageView
+            android:id="@+id/moreMenuBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/menu"
             android:layout_marginStart="10dp"
             style="@style/appBarIcon"/>
 
