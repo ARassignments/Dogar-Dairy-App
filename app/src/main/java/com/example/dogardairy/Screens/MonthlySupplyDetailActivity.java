@@ -93,7 +93,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
     ListView listView;
     LinearLayout notfoundContainer;
     TextView totalQty, grandTotalAmount, balancedAmount, date, appBarTitle;
-    ImageView sendMessageBtn, sortBtn, callBtn, fullListBtn, deleteAllBtn, milkRateBtn, billBtn, moreMenuBtn;
+    ImageView sendMessageBtn, sortBtn, callBtn, fullListBtn, deleteAllBtn, milkRateBtn, billBtn, moreMenuBtn, balanceBtn;
     FrameLayout sendWhatsappMessageBtn;
     Button addQuantityBtn, unpaidBtn;
     ArrayList<MonthlyDetailModel> datalist = new ArrayList<>();
@@ -135,6 +135,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         milkRateBtn = findViewById(R.id.milkRateBtn);
         billBtn = findViewById(R.id.billBtn);
         moreMenuBtn = findViewById(R.id.moreMenuBtn);
+        balanceBtn = findViewById(R.id.balanceBtn);
 
         if(!sharedPreferences.getString("UID","").equals("")){
             UID = sharedPreferences.getString("UID","").toString();
@@ -651,6 +652,13 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                 Intent intent = new Intent(MonthlySupplyDetailActivity.this, BillActivity.class);
                 intent.putExtra("MonthlyId",MonthlyId);
                 startActivity(intent);
+            }
+        });
+
+        balanceBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                balanceInitial();
             }
         });
 
