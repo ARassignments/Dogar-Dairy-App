@@ -91,6 +91,7 @@ public class ProfileActivity extends AppCompatActivity {
     Dialog dialogImage;
     CardView boy_1, boy_2, boy_3, boy_4, boy_5, boy_6, boy_7, boy_8, boy_9, boy_10, boy_11, boy_12, boy_13, boy_14, boy_15, boy_16, boy_17, boy_18;
     CardView girl_1, girl_2, girl_3, girl_4, girl_5, girl_6, girl_7, girl_8, girl_9, girl_10, girl_11, girl_12, girl_13, girl_14, girl_15, girl_16, girl_17, girl_18, girl_19, girl_20;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

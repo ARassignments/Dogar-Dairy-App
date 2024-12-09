@@ -303,6 +303,8 @@ public class ReportsFragment extends Fragment {
                 public void onClick(View view) {
                     Intent intent = new Intent(context, BillActivity.class);
                     intent.putExtra("MonthlyId",data.get(i).getId());
+                    intent.putExtra("contact",data.get(i).getContact());
+                    intent.putExtra("personName",data.get(i).getName());
                     startActivity(intent);
                 }
             });

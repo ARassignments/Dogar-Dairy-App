@@ -177,215 +177,14 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         sendWhatsappMessageBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                String balance = balancedAmount.getText().toString().trim();
-                if(balancedAmount.getText().toString().trim().equals(grandTotalAmount.getText().toString().trim())){
-                    balance = "0";
-                }
-
-                String txt = "                ATTARI DAIRY \n" +
-                        "***** Monthly Milk Report ***** \n" +
-                        "Month: " +currentMonth+"\n"+
-                        "Name: "+personName+"\n" +
-                        "_____________________________________\n\n";
-
-                for(int i=0;i<datalistReports.size();i++){
-                    if(datalistReports.get(i).getItemName().equals("")){
-                        double total = Double.parseDouble(datalistReports.get(i).getQty())*Double.parseDouble(datalistReports.get(i).getAmount());
-                        txt += "     "+(i+1)+".  "+datalistReports.get(i).getDate()+"    "+datalistReports.get(i).getQty()+"kg     Rs "+total+"/- \n";
-                    } else {
-                        double total = Double.parseDouble(datalistReports.get(i).getQty())*Double.parseDouble(datalistReports.get(i).getAmount());
-                        txt += "     "+(i+1)+".  "+datalistReports.get(i).getDate()+"    "+datalistReports.get(i).getQty()+"kg     Rs "+total+"/- \n" +
-                                "    ↳   Item:     "+datalistReports.get(i).getItemName()+"    Rs "+datalistReports.get(i).getItemAmount()+"/- \n";
-                    }
-                }
-
-                if(milkRate.equals("0")){
-                    txt += "_____________________________________\n\n" +
-                            "Milk Rate is: Rs "+DashboardActivity.getMilkRate()+"/- \n" +
-                            "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
-                            "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
-                            "Your pending Balance: Rs "+balance+"/-\n" +
-                            " ----- JazakAllah -----";
-                } else {
-                    txt += "_____________________________________\n\n" +
-                            "Milk Rate is: Rs "+milkRate+"/- \n" +
-                            "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
-                            "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
-                            "Your pending Balance: Rs "+balance+"/-\n" +
-                            " ----- JazakAllah -----";
-                }
-
-//                String txt = "                ATTARI DAIRY \n" +
-//                        "***** Monthly Milk Report ***** \n" +
-//                        "Name: "+personName+"\n" +
-//                        "Milk Rate is: Rs "+DashboardActivity.getMilkRate()+"/- \n" +
-//                        "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
-//                        "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
-//                        "Your pending Balance: Rs "+balance+"/-\n" +
-//                        " ----- JazakAllah -----";
-
-                if(datalist.size() == 0){
-                    Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
-                    alertdialog.setContentView(R.layout.dialog_error);
-                    alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-                    alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                    alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-                    alertdialog.getWindow().setGravity(Gravity.CENTER);
-                    alertdialog.setCancelable(false);
-                    alertdialog.setCanceledOnTouchOutside(false);
-                    TextView message = alertdialog.findViewById(R.id.msgDialog);
-                    message.setText("Message not sended because no data found!!!");
-                    alertdialog.show();
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            alertdialog.dismiss();
-                        }
-                    },3000);
-                } else {
-                    PackageManager packageManager = getPackageManager();
-                    try {
-                        packageManager.getPackageInfo("com.whatsapp",PackageManager.GET_ACTIVITIES);
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://api.whatsapp.com/send?phone="+contact+"&text="+txt));
-                        startActivity(intent);
-                    } catch (PackageManager.NameNotFoundException e){
-                        Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
-                        alertdialog.setContentView(R.layout.dialog_error);
-                        alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-                        alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                        alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-                        alertdialog.getWindow().setGravity(Gravity.CENTER);
-                        alertdialog.setCancelable(false);
-                        alertdialog.setCanceledOnTouchOutside(false);
-                        TextView message = alertdialog.findViewById(R.id.msgDialog);
-                        message.setText("Something went wrong, message not sended!!!");
-                        alertdialog.show();
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                alertdialog.dismiss();
-                            }
-                        },3000);
-                    }
-                }
+                sendWhatsAppInitial();
             }
         });
 
         sendMessageBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                    if (ContextCompat.checkSelfPermission(MonthlySupplyDetailActivity.this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED ||
-                            ContextCompat.checkSelfPermission(MonthlySupplyDetailActivity.this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
-                            ContextCompat.checkSelfPermission(MonthlySupplyDetailActivity.this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
-
-                        // If any permission is not granted, request them
-                        ActivityCompat.requestPermissions(MonthlySupplyDetailActivity.this, new String[]{
-                                Manifest.permission.SEND_SMS,
-                                Manifest.permission.RECEIVE_SMS,
-                                Manifest.permission.READ_SMS
-                        }, 123);
-                    } else {
-                        String balance = balancedAmount.getText().toString().trim();
-                        if(balancedAmount.getText().toString().trim().equals(grandTotalAmount.getText().toString().trim())){
-                            balance = "0";
-                        }
-
-                        String txt = "                ATTARI DAIRY \n" +
-                                "***** Monthly Milk Report ***** \n" +
-                                "Month: " +currentMonth+"\n"+
-                                "Name: "+personName+"\n" +
-                                "_____________________________________\n\n";
-
-                        for(int i=0;i<datalistReports.size();i++){
-                            if(datalistReports.get(i).getItemName().equals("")){
-                                double total = Double.parseDouble(datalistReports.get(i).getQty())*Double.parseDouble(datalistReports.get(i).getAmount());
-                                txt += "     "+(i+1)+".  "+datalistReports.get(i).getDate()+"    "+datalistReports.get(i).getQty()+"kg     Rs "+total+"/- \n";
-                            } else {
-                                double total = Double.parseDouble(datalistReports.get(i).getQty())*Double.parseDouble(datalistReports.get(i).getAmount());
-                                txt += "     "+(i+1)+".  "+datalistReports.get(i).getDate()+"    "+datalistReports.get(i).getQty()+"kg     Rs "+total+"/- \n" +
-                                        "    ↳   Item:     "+datalistReports.get(i).getItemName()+"    Rs "+datalistReports.get(i).getItemAmount()+"/- \n";
-                            }
-                        }
-
-                        if(milkRate.equals("0")){
-                            txt += "_____________________________________\n\n" +
-                                    "Milk Rate is: Rs "+DashboardActivity.getMilkRate()+"/- \n" +
-                                    "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
-                                    "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
-                                    "Your pending Balance: Rs "+balance+"/-\n" +
-                                    " ----- JazakAllah -----";
-                        } else {
-                            txt += "_____________________________________\n\n" +
-                                    "Milk Rate is: Rs "+milkRate+"/- \n" +
-                                    "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
-                                    "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
-                                    "Your pending Balance: Rs "+balance+"/-\n" +
-                                    " ----- JazakAllah -----";
-                        }
-
-                        if(datalist.size() == 0){
-                            Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
-                            alertdialog.setContentView(R.layout.dialog_error);
-                            alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-                            alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                            alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-                            alertdialog.getWindow().setGravity(Gravity.CENTER);
-                            alertdialog.setCancelable(false);
-                            alertdialog.setCanceledOnTouchOutside(false);
-                            TextView message = alertdialog.findViewById(R.id.msgDialog);
-                            message.setText("Message not sended because no data found!!!");
-                            alertdialog.show();
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    alertdialog.dismiss();
-                                }
-                            },3000);
-                        } else {
-                            try {
-                                ArrayList<String> parts = MainActivity.mySmsManager.divideMessage(txt);
-                                MainActivity.mySmsManager.sendMultipartTextMessage( ""+contact,null, parts,null,null);
-                                Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
-                                alertdialog.setContentView(R.layout.dialog_success);
-                                alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-                                alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                                alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-                                alertdialog.getWindow().setGravity(Gravity.CENTER);
-                                alertdialog.setCancelable(false);
-                                alertdialog.setCanceledOnTouchOutside(false);
-                                TextView message = alertdialog.findViewById(R.id.msgDialog);
-                                message.setText("Message Sended Successfully!!!");
-                                alertdialog.show();
-                                new Handler().postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        alertdialog.dismiss();
-                                    }
-                                },3000);
-                            }
-                            catch (Exception exception){
-                                Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
-                                alertdialog.setContentView(R.layout.dialog_error);
-                                alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-                                alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                                alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-                                alertdialog.getWindow().setGravity(Gravity.CENTER);
-                                alertdialog.setCancelable(false);
-                                alertdialog.setCanceledOnTouchOutside(false);
-                                TextView message = alertdialog.findViewById(R.id.msgDialog);
-                                message.setText("Something went wrong, message not sended!!!");
-                                alertdialog.show();
-                                new Handler().postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        alertdialog.dismiss();
-                                    }
-                                },3000);
-                            }
-                        }
-                    }
+                sendSmsInitial();
             }
         });
 
@@ -497,145 +296,14 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         fullListBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if(datalist.size() == 0){
-                    Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
-                    alertdialog.setContentView(R.layout.dialog_error);
-                    alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-                    alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                    alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-                    alertdialog.getWindow().setGravity(Gravity.CENTER);
-                    alertdialog.setCancelable(false);
-                    alertdialog.setCanceledOnTouchOutside(false);
-                    TextView message = alertdialog.findViewById(R.id.msgDialog);
-                    message.setText("PDF not generated because no data found!!!");
-                    alertdialog.show();
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            alertdialog.dismiss();
-                        }
-                    },3000);
-                } else {
-                    reportDialog = new Dialog(MonthlySupplyDetailActivity.this);
-                    reportDialog.setContentView(R.layout.dialog_pdf_report);
-                    reportDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT);
-                    reportDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                    reportDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-                    reportDialog.getWindow().setGravity(Gravity.CENTER);
-                    reportDialog.setCancelable(false);
-                    reportDialog.setCanceledOnTouchOutside(false);
-                    Button cancelBtn, shareBtn;
-                    ImageView imageView;
-                    cancelBtn = reportDialog.findViewById(R.id.cancelBtn);
-                    shareBtn = reportDialog.findViewById(R.id.shareBtn);
-                    imageView = reportDialog.findViewById(R.id.imageView);
-
-                    showPdfPreview(generatePDF(datalistReports),imageView);
-
-                    shareBtn.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            sharePDF(generatePDF(datalistReports));
-                            reportDialog.dismiss();
-                        }
-                    });
-
-                    cancelBtn.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            reportDialog.dismiss();
-                        }
-                    });
-                }
+                fullListInitial();
             }
         });
 
         deleteAllBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(datalist.size()==0){
-                    Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
-                    alertdialog.setContentView(R.layout.dialog_error);
-                    alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-                    alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                    alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-                    alertdialog.getWindow().setGravity(Gravity.CENTER);
-                    alertdialog.setCancelable(false);
-                    alertdialog.setCanceledOnTouchOutside(false);
-                    TextView message = alertdialog.findViewById(R.id.msgDialog);
-                    message.setText("Data not deleted because no data found!!!");
-                    alertdialog.show();
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            alertdialog.dismiss();
-                        }
-                    },3000);
-                } else {
-                    Dialog actiondialog = new Dialog(MonthlySupplyDetailActivity.this);
-                    actiondialog.setContentView(R.layout.dialog_confirm);
-                    actiondialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-                    actiondialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-                    actiondialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-                    actiondialog.getWindow().setGravity(Gravity.CENTER);
-                    actiondialog.setCancelable(false);
-                    actiondialog.setCanceledOnTouchOutside(false);
-                    Button cancelBtn, yesBtn;
-                    TextView msg;
-                    yesBtn = actiondialog.findViewById(R.id.yesBtn);
-                    cancelBtn = actiondialog.findViewById(R.id.cancelBtn);
-                    msg = actiondialog.findViewById(R.id.message);
-                    msg.setText("Are you sure to delete all data of this month?");
-                    cancelBtn.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            actiondialog.dismiss();
-                        }
-                    });
-                    yesBtn.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").child(date.getText().toString().trim()).addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    if(snapshot.exists()){
-                                        double balanced_amount = Double.parseDouble(snapshot.child("balanced_amount").getValue().toString());
-                                        double balance = Double.parseDouble(balancedAmount.getText().toString().trim());
-                                        MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").child(date.getText().toString()).setValue("");
-                                        MainActivity.db.child("Monthly").child(MonthlyId).child("balance").setValue(""+(balance-balanced_amount));
-                                        balancedAmount.setText(""+(balance-balanced_amount));
-                                        Dialog dialog = new Dialog(MonthlySupplyDetailActivity.this);
-                                        dialog.setContentView(R.layout.dialog_success);
-                                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                                        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                                        dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-                                        dialog.getWindow().setGravity(Gravity.CENTER);
-                                        dialog.setCanceledOnTouchOutside(false);
-                                        dialog.setCancelable(false);
-                                        TextView msg = dialog.findViewById(R.id.msgDialog);
-                                        msg.setText("Deleted Successfully!!!");
-                                        dialog.show();
-
-                                        new Handler().postDelayed(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                dialog.dismiss();
-                                                actiondialog.dismiss();
-                                            }
-                                        },3000);
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-
-                                }
-                            });
-                        }
-                    });
-                    actiondialog.show();
-                }
+                deleteAllInitial();
             }
         });
 
@@ -696,6 +364,8 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         Intent intent = new Intent(MonthlySupplyDetailActivity.this, BillActivity.class);
                         intent.putExtra("MonthlyId",MonthlyId);
+                        intent.putExtra("contact",contact);
+                        intent.putExtra("personName",personName);
                         startActivity(intent);
                         moreMenuDialog.dismiss();
                     }
@@ -711,8 +381,459 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                 moreMenuDialog.show();
             }
         });
-
         fetchData();
+    }
+
+    public void sorting(){
+        if(sortingStatus.equals("asc")){
+            sortingStatus = "dsc";
+            sortBtn.setImageResource(R.drawable.deasscending_order);
+        } else if(sortingStatus.equals("dsc")){
+            sortingStatus = "asc";
+            sortBtn.setImageResource(R.drawable.asscending_order);
+        }
+        fetchData();
+    }
+
+    public void fetchData(){
+        MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").child(date.getText().toString().trim()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    datalist.clear();
+                    datalistReports.clear();
+                    double grandtotal = 0.0;
+                    double grandqty = 0.0;
+                    grandTotalAmount.setText("0");
+                    totalQty.setText("0");
+                    for (DataSnapshot ds: snapshot.getChildren()){
+                        if(!ds.getKey().equals("balanced_amount")){
+                            MonthlyDetailModel model = new MonthlyDetailModel(ds.getKey(),
+                                    ds.child("amount").getValue().toString(),
+                                    ds.child("qty").getValue().toString(),
+                                    ds.child("date").getValue().toString(),
+                                    ds.child("month").getValue().toString(),
+                                    ds.child("itemName").getValue().toString(),
+                                    ds.child("itemAmount").getValue().toString(),
+                                    ds.child("totalAmount").getValue().toString()
+                            );
+                            datalist.add(model);
+                            datalistReports.add(model);
+                            grandtotal += Double.parseDouble(ds.child("totalAmount").getValue().toString());
+                            grandqty += Double.parseDouble(ds.child("qty").getValue().toString());
+                        }
+                    }
+                    if(datalist.size() > 0){
+                        // Sort by date using the date string from the data snapshot
+                        Collections.sort(datalist, new Comparator<MonthlyDetailModel>() {
+                            @Override
+                            public int compare(MonthlyDetailModel o1, MonthlyDetailModel o2) {
+                                String date1Str = o1.getDate(); // Assuming o1.getDate() returns the date string
+                                String date2Str = o2.getDate(); // Assuming o2.getDate() returns the date string
+
+                                // Define the date format
+                                SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM", Locale.getDefault());
+                                try {
+                                    Date date1 = dateFormat.parse(date1Str);
+                                    Date date2 = dateFormat.parse(date2Str);
+                                    return date1.compareTo(date2);
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                    return 0;
+                                }
+                            }
+                        });
+
+                        Collections.sort(datalistReports, new Comparator<MonthlyDetailModel>() {
+                            @Override
+                            public int compare(MonthlyDetailModel o1, MonthlyDetailModel o2) {
+                                String date1Str = o1.getDate(); // Assuming o1.getDate() returns the date string
+                                String date2Str = o2.getDate(); // Assuming o2.getDate() returns the date string
+
+                                // Define the date format
+                                SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM", Locale.getDefault());
+                                try {
+                                    Date date1 = dateFormat.parse(date1Str);
+                                    Date date2 = dateFormat.parse(date2Str);
+                                    return date1.compareTo(date2);
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                    return 0;
+                                }
+                            }
+                        });
+
+                        listView.setVisibility(View.VISIBLE);
+                        notfoundContainer.setVisibility(View.GONE);
+                        if(sortingStatus.equals("dsc")){
+                            Collections.reverse(datalist);
+                        }
+                        MyAdapter adapter = new MyAdapter(MonthlySupplyDetailActivity.this,datalist);
+                        listView.setAdapter(adapter);
+                        grandTotalAmount.setText(""+grandtotal);
+                        totalQty.setText(""+grandqty);
+                    } else {
+                        listView.setVisibility(View.GONE);
+                        notfoundContainer.setVisibility(View.VISIBLE);
+                        grandTotalAmount.setText("0");
+                        totalQty.setText("0");
+                    }
+                } else {
+                    listView.setVisibility(View.GONE);
+                    notfoundContainer.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    public void fullListInitial(){
+        if(datalist.size() == 0){
+            Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
+            alertdialog.setContentView(R.layout.dialog_error);
+            alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+            alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+            alertdialog.getWindow().setGravity(Gravity.CENTER);
+            alertdialog.setCancelable(false);
+            alertdialog.setCanceledOnTouchOutside(false);
+            TextView message = alertdialog.findViewById(R.id.msgDialog);
+            message.setText("PDF not generated because no data found!!!");
+            alertdialog.show();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    alertdialog.dismiss();
+                }
+            },3000);
+        } else {
+            reportDialog = new Dialog(MonthlySupplyDetailActivity.this);
+            reportDialog.setContentView(R.layout.dialog_pdf_report);
+            reportDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT);
+            reportDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            reportDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+            reportDialog.getWindow().setGravity(Gravity.CENTER);
+            reportDialog.setCancelable(false);
+            reportDialog.setCanceledOnTouchOutside(false);
+            Button cancelBtn, shareBtn;
+            ImageView imageView;
+            cancelBtn = reportDialog.findViewById(R.id.cancelBtn);
+            shareBtn = reportDialog.findViewById(R.id.shareBtn);
+            imageView = reportDialog.findViewById(R.id.imageView);
+
+            showPdfPreview(generatePDF(datalistReports),imageView);
+
+            shareBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    sharePDF(generatePDF(datalistReports));
+                    reportDialog.dismiss();
+                }
+            });
+
+            cancelBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    reportDialog.dismiss();
+                }
+            });
+        }
+    }
+
+    public void deleteAllInitial(){
+        if(datalist.size()==0){
+            Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
+            alertdialog.setContentView(R.layout.dialog_error);
+            alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+            alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+            alertdialog.getWindow().setGravity(Gravity.CENTER);
+            alertdialog.setCancelable(false);
+            alertdialog.setCanceledOnTouchOutside(false);
+            TextView message = alertdialog.findViewById(R.id.msgDialog);
+            message.setText("Data not deleted because no data found!!!");
+            alertdialog.show();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    alertdialog.dismiss();
+                }
+            },3000);
+        } else {
+            Dialog actiondialog = new Dialog(MonthlySupplyDetailActivity.this);
+            actiondialog.setContentView(R.layout.dialog_confirm);
+            actiondialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+            actiondialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+            actiondialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+            actiondialog.getWindow().setGravity(Gravity.CENTER);
+            actiondialog.setCancelable(false);
+            actiondialog.setCanceledOnTouchOutside(false);
+            Button cancelBtn, yesBtn;
+            TextView msg;
+            yesBtn = actiondialog.findViewById(R.id.yesBtn);
+            cancelBtn = actiondialog.findViewById(R.id.cancelBtn);
+            msg = actiondialog.findViewById(R.id.message);
+            msg.setText("Are you sure to delete all data of this month?");
+            cancelBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    actiondialog.dismiss();
+                }
+            });
+            yesBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").child(date.getText().toString().trim()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.exists()){
+                                double balanced_amount = Double.parseDouble(snapshot.child("balanced_amount").getValue().toString());
+                                double balance = Double.parseDouble(balancedAmount.getText().toString().trim());
+                                MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").child(date.getText().toString()).setValue("");
+                                MainActivity.db.child("Monthly").child(MonthlyId).child("balance").setValue(""+(balance-balanced_amount));
+                                balancedAmount.setText(""+(balance-balanced_amount));
+                                Dialog dialog = new Dialog(MonthlySupplyDetailActivity.this);
+                                dialog.setContentView(R.layout.dialog_success);
+                                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                                dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                                dialog.getWindow().setGravity(Gravity.CENTER);
+                                dialog.setCanceledOnTouchOutside(false);
+                                dialog.setCancelable(false);
+                                TextView msg = dialog.findViewById(R.id.msgDialog);
+                                msg.setText("Deleted Successfully!!!");
+                                dialog.show();
+
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        dialog.dismiss();
+                                        actiondialog.dismiss();
+                                    }
+                                },3000);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }
+            });
+            actiondialog.show();
+        }
+    }
+
+    public void sendSmsInitial(){
+        if (ContextCompat.checkSelfPermission(MonthlySupplyDetailActivity.this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MonthlySupplyDetailActivity.this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(MonthlySupplyDetailActivity.this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
+
+            // If any permission is not granted, request them
+            ActivityCompat.requestPermissions(MonthlySupplyDetailActivity.this, new String[]{
+                    Manifest.permission.SEND_SMS,
+                    Manifest.permission.RECEIVE_SMS,
+                    Manifest.permission.READ_SMS
+            }, 123);
+        } else {
+            String balance = balancedAmount.getText().toString().trim();
+            if(balancedAmount.getText().toString().trim().equals(grandTotalAmount.getText().toString().trim())){
+                balance = "0";
+            }
+
+            String txt = "                ATTARI DAIRY \n" +
+                    "***** Monthly Milk Report ***** \n" +
+                    "Month: " +currentMonth+"\n"+
+                    "Name: "+personName+"\n" +
+                    "_____________________________________\n\n";
+
+            for(int i=0;i<datalistReports.size();i++){
+                if(datalistReports.get(i).getItemName().equals("")){
+                    double total = Double.parseDouble(datalistReports.get(i).getQty())*Double.parseDouble(datalistReports.get(i).getAmount());
+                    txt += "     "+(i+1)+".  "+datalistReports.get(i).getDate()+"    "+datalistReports.get(i).getQty()+"kg     Rs "+total+"/- \n";
+                } else {
+                    double total = Double.parseDouble(datalistReports.get(i).getQty())*Double.parseDouble(datalistReports.get(i).getAmount());
+                    txt += "     "+(i+1)+".  "+datalistReports.get(i).getDate()+"    "+datalistReports.get(i).getQty()+"kg     Rs "+total+"/- \n" +
+                            "    ↳   Item:     "+datalistReports.get(i).getItemName()+"    Rs "+datalistReports.get(i).getItemAmount()+"/- \n";
+                }
+            }
+
+            if(milkRate.equals("0")){
+                txt += "_____________________________________\n\n" +
+                        "Milk Rate is: Rs "+DashboardActivity.getMilkRate()+"/- \n" +
+                        "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
+                        "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
+                        "Your pending Balance: Rs "+balance+"/-\n" +
+                        " ----- JazakAllah -----";
+            } else {
+                txt += "_____________________________________\n\n" +
+                        "Milk Rate is: Rs "+milkRate+"/- \n" +
+                        "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
+                        "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
+                        "Your pending Balance: Rs "+balance+"/-\n" +
+                        " ----- JazakAllah -----";
+            }
+
+            if(datalist.size() == 0){
+                Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
+                alertdialog.setContentView(R.layout.dialog_error);
+                alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                alertdialog.getWindow().setGravity(Gravity.CENTER);
+                alertdialog.setCancelable(false);
+                alertdialog.setCanceledOnTouchOutside(false);
+                TextView message = alertdialog.findViewById(R.id.msgDialog);
+                message.setText("Message not sended because no data found!!!");
+                alertdialog.show();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        alertdialog.dismiss();
+                    }
+                },3000);
+            } else {
+                try {
+                    ArrayList<String> parts = MainActivity.mySmsManager.divideMessage(txt);
+                    MainActivity.mySmsManager.sendMultipartTextMessage( ""+contact,null, parts,null,null);
+                    Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
+                    alertdialog.setContentView(R.layout.dialog_success);
+                    alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                    alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                    alertdialog.getWindow().setGravity(Gravity.CENTER);
+                    alertdialog.setCancelable(false);
+                    alertdialog.setCanceledOnTouchOutside(false);
+                    TextView message = alertdialog.findViewById(R.id.msgDialog);
+                    message.setText("Message Sended Successfully!!!");
+                    alertdialog.show();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            alertdialog.dismiss();
+                        }
+                    },3000);
+                }
+                catch (Exception exception){
+                    Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
+                    alertdialog.setContentView(R.layout.dialog_error);
+                    alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                    alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                    alertdialog.getWindow().setGravity(Gravity.CENTER);
+                    alertdialog.setCancelable(false);
+                    alertdialog.setCanceledOnTouchOutside(false);
+                    TextView message = alertdialog.findViewById(R.id.msgDialog);
+                    message.setText("Something went wrong, message not sended!!!");
+                    alertdialog.show();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            alertdialog.dismiss();
+                        }
+                    },3000);
+                }
+            }
+        }
+    }
+
+    public void sendWhatsAppInitial(){
+        String balance = balancedAmount.getText().toString().trim();
+        if(balancedAmount.getText().toString().trim().equals(grandTotalAmount.getText().toString().trim())){
+            balance = "0";
+        }
+
+        String txt = "                ATTARI DAIRY \n" +
+                "***** Monthly Milk Report ***** \n" +
+                "Month: " +currentMonth+"\n"+
+                "Name: "+personName+"\n" +
+                "_____________________________________\n\n";
+
+        for(int i=0;i<datalistReports.size();i++){
+            if(datalistReports.get(i).getItemName().equals("")){
+                double total = Double.parseDouble(datalistReports.get(i).getQty())*Double.parseDouble(datalistReports.get(i).getAmount());
+                txt += "     "+(i+1)+".  "+datalistReports.get(i).getDate()+"    "+datalistReports.get(i).getQty()+"kg     Rs "+total+"/- \n";
+            } else {
+                double total = Double.parseDouble(datalistReports.get(i).getQty())*Double.parseDouble(datalistReports.get(i).getAmount());
+                txt += "     "+(i+1)+".  "+datalistReports.get(i).getDate()+"    "+datalistReports.get(i).getQty()+"kg     Rs "+total+"/- \n" +
+                        "    ↳   Item:     "+datalistReports.get(i).getItemName()+"    Rs "+datalistReports.get(i).getItemAmount()+"/- \n";
+            }
+        }
+
+        if(milkRate.equals("0")){
+            txt += "_____________________________________\n\n" +
+                    "Milk Rate is: Rs "+DashboardActivity.getMilkRate()+"/- \n" +
+                    "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
+                    "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
+                    "Your pending Balance: Rs "+balance+"/-\n" +
+                    " ----- JazakAllah -----";
+        } else {
+            txt += "_____________________________________\n\n" +
+                    "Milk Rate is: Rs "+milkRate+"/- \n" +
+                    "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
+                    "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
+                    "Your pending Balance: Rs "+balance+"/-\n" +
+                    " ----- JazakAllah -----";
+        }
+
+//                String txt = "                ATTARI DAIRY \n" +
+//                        "***** Monthly Milk Report ***** \n" +
+//                        "Name: "+personName+"\n" +
+//                        "Milk Rate is: Rs "+DashboardActivity.getMilkRate()+"/- \n" +
+//                        "Total Price of Milk is: Rs "+grandTotalAmount.getText().toString().trim()+"/- \n" +
+//                        "Total quantity is: "+totalQty.getText().toString().trim()+"Kg \n" +
+//                        "Your pending Balance: Rs "+balance+"/-\n" +
+//                        " ----- JazakAllah -----";
+
+        if(datalist.size() == 0){
+            Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
+            alertdialog.setContentView(R.layout.dialog_error);
+            alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+            alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+            alertdialog.getWindow().setGravity(Gravity.CENTER);
+            alertdialog.setCancelable(false);
+            alertdialog.setCanceledOnTouchOutside(false);
+            TextView message = alertdialog.findViewById(R.id.msgDialog);
+            message.setText("Message not sended because no data found!!!");
+            alertdialog.show();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    alertdialog.dismiss();
+                }
+            },3000);
+        } else {
+            PackageManager packageManager = getPackageManager();
+            try {
+                packageManager.getPackageInfo("com.whatsapp",PackageManager.GET_ACTIVITIES);
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://api.whatsapp.com/send?phone="+contact+"&text="+txt));
+                startActivity(intent);
+            } catch (PackageManager.NameNotFoundException e){
+                Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
+                alertdialog.setContentView(R.layout.dialog_error);
+                alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+                alertdialog.getWindow().setGravity(Gravity.CENTER);
+                alertdialog.setCancelable(false);
+                alertdialog.setCanceledOnTouchOutside(false);
+                TextView message = alertdialog.findViewById(R.id.msgDialog);
+                message.setText("Something went wrong, message not sended!!!");
+                alertdialog.show();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        alertdialog.dismiss();
+                    }
+                },3000);
+            }
+        }
     }
 
     public void milkRateInitial(){
@@ -839,111 +960,6 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         });
 
         balanceDialog.show();
-    }
-
-    public void sorting(){
-        if(sortingStatus.equals("asc")){
-            sortingStatus = "dsc";
-            sortBtn.setImageResource(R.drawable.deasscending_order);
-        } else if(sortingStatus.equals("dsc")){
-            sortingStatus = "asc";
-            sortBtn.setImageResource(R.drawable.asscending_order);
-        }
-        fetchData();
-    }
-
-    public void fetchData(){
-        MainActivity.db.child("Monthly").child(MonthlyId).child("MonthlyDetail").child(date.getText().toString().trim()).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.exists()){
-                    datalist.clear();
-                    datalistReports.clear();
-                    double grandtotal = 0.0;
-                    double grandqty = 0.0;
-                    for (DataSnapshot ds: snapshot.getChildren()){
-                        if(!ds.getKey().equals("balanced_amount")){
-                            MonthlyDetailModel model = new MonthlyDetailModel(ds.getKey(),
-                                    ds.child("amount").getValue().toString(),
-                                    ds.child("qty").getValue().toString(),
-                                    ds.child("date").getValue().toString(),
-                                    ds.child("month").getValue().toString(),
-                                    ds.child("itemName").getValue().toString(),
-                                    ds.child("itemAmount").getValue().toString(),
-                                    ds.child("totalAmount").getValue().toString()
-                            );
-                            datalist.add(model);
-                            datalistReports.add(model);
-                            grandtotal += Double.parseDouble(ds.child("totalAmount").getValue().toString());
-                            grandqty += Double.parseDouble(ds.child("qty").getValue().toString());
-                        }
-                    }
-                    if(datalist.size() > 0){
-                        // Sort by date using the date string from the data snapshot
-                        Collections.sort(datalist, new Comparator<MonthlyDetailModel>() {
-                            @Override
-                            public int compare(MonthlyDetailModel o1, MonthlyDetailModel o2) {
-                                String date1Str = o1.getDate(); // Assuming o1.getDate() returns the date string
-                                String date2Str = o2.getDate(); // Assuming o2.getDate() returns the date string
-
-                                // Define the date format
-                                SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM", Locale.getDefault());
-                                try {
-                                    Date date1 = dateFormat.parse(date1Str);
-                                    Date date2 = dateFormat.parse(date2Str);
-                                    return date1.compareTo(date2);
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
-                                    return 0;
-                                }
-                            }
-                        });
-
-                        Collections.sort(datalistReports, new Comparator<MonthlyDetailModel>() {
-                            @Override
-                            public int compare(MonthlyDetailModel o1, MonthlyDetailModel o2) {
-                                String date1Str = o1.getDate(); // Assuming o1.getDate() returns the date string
-                                String date2Str = o2.getDate(); // Assuming o2.getDate() returns the date string
-
-                                // Define the date format
-                                SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM", Locale.getDefault());
-                                try {
-                                    Date date1 = dateFormat.parse(date1Str);
-                                    Date date2 = dateFormat.parse(date2Str);
-                                    return date1.compareTo(date2);
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
-                                    return 0;
-                                }
-                            }
-                        });
-
-                        listView.setVisibility(View.VISIBLE);
-                        notfoundContainer.setVisibility(View.GONE);
-                        if(sortingStatus.equals("dsc")){
-                            Collections.reverse(datalist);
-                        }
-                        MyAdapter adapter = new MyAdapter(MonthlySupplyDetailActivity.this,datalist);
-                        listView.setAdapter(adapter);
-                        grandTotalAmount.setText(""+grandtotal);
-                        totalQty.setText(""+grandqty);
-                    } else {
-                        listView.setVisibility(View.GONE);
-                        notfoundContainer.setVisibility(View.VISIBLE);
-                        grandTotalAmount.setText("0");
-                        totalQty.setText("0");
-                    }
-                } else {
-                    listView.setVisibility(View.GONE);
-                    notfoundContainer.setVisibility(View.VISIBLE);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
     }
 
     public void selectMonth(){
@@ -1693,7 +1709,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                         .setBorderLeft(new SolidBorder(new DeviceRgb(0xE6, 0xED, 0xF0), 2))
                         .setPaddings(3,0,0,0)
                 );
-                summaryHeadTable.addCell(new Cell().add(new Paragraph("Total Amount")
+                summaryHeadTable.addCell(new Cell().add(new Paragraph("Current Month")
                         .setFont(fontMedium)
                         .setFontSize(10)
                         .setTextAlignment(TextAlignment.CENTER)
@@ -1703,7 +1719,7 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                         .setBorderRight(new SolidBorder(new DeviceRgb(0xE6, 0xED, 0xF0), 2))
                         .setPaddings(3,0,0,0)
                 );
-                summaryHeadTable.addCell(new Cell().add(new Paragraph("Pending Balance")
+                summaryHeadTable.addCell(new Cell().add(new Paragraph("Total + Pending Balance")
                         .setFont(fontMedium)
                         .setFontSize(10)
                         .setTextAlignment(TextAlignment.RIGHT)
