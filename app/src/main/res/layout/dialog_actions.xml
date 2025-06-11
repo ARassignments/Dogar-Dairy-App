@@ -22,30 +22,23 @@
             android:text="What do you want?"
             style="@style/authTitle"/>
 
-        <LinearLayout
+        <Button
+            android:id="@+id/editBtn"
+            android:text="Edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="16dp">
+            android:layout_weight="2"
+            android:layout_marginTop="16dp"
+            style="@style/flatButton"/>
 
-            <Button
-                android:id="@+id/editBtn"
-                android:text="Edit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:layout_marginRight="16dp"
-                style="@style/flatButton"/>
-
-            <Button
-                android:id="@+id/deleteBtn"
-                android:text="Delete"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                style="@style/logoutButton"/>
-
-        </LinearLayout>
+        <Button
+            android:id="@+id/deleteBtn"
+            android:text="Delete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="16dp"
+            style="@style/logoutButton"/>
 
     </LinearLayout>
 

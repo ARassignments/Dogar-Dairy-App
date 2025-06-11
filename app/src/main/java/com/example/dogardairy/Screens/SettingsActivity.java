@@ -95,10 +95,39 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.messagesBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(SettingsActivity.this, MessagesActivity.class));
+            }
+        });
+
+
         findViewById(R.id.viewProfileBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(SettingsActivity.this, ProfileActivity.class));
+            }
+        });
+
+        findViewById(R.id.subscriptionBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(SettingsActivity.this, SubscriptionActivity.class));
+            }
+        });
+
+        findViewById(R.id.privacyPolicyBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(SettingsActivity.this, PrivacyPolicyActivity.class));
+            }
+        });
+
+        findViewById(R.id.helpCenterBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(SettingsActivity.this, HelpCenterActivity.class));
             }
         });
 

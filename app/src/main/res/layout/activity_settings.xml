@@ -87,34 +87,6 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="28dp"
-            style="@style/horizontalRow"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Notifications"
-            android:layout_marginTop="2dp"
-            android:paddingVertical="16dp"
-            android:paddingHorizontal="32dp"
-            style="@style/settingsItems"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            style="@style/horizontalRow"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Data and Storages"
-            android:layout_marginTop="2dp"
-            android:paddingVertical="16dp"
-            android:paddingHorizontal="32dp"
-            style="@style/settingsItems"/>
-
-        <LinearLayout
             android:id="@+id/adminOptions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -151,6 +123,21 @@
                 android:paddingHorizontal="32dp"
                 style="@style/settingsItems"/>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                style="@style/horizontalRow"/>
+
+            <TextView
+                android:id="@+id/messagesBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Messages"
+                android:layout_marginTop="2dp"
+                android:paddingVertical="16dp"
+                android:paddingHorizontal="32dp"
+                style="@style/settingsItems"/>
+
         </LinearLayout>
 
         <LinearLayout
@@ -174,9 +161,10 @@
             style="@style/horizontalRow"/>
 
         <TextView
+            android:id="@+id/privacyPolicyBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Linked Account"
+            android:text="Privacy Policy"
             android:layout_marginTop="2dp"
             android:paddingVertical="16dp"
             android:paddingHorizontal="32dp"
@@ -184,7 +172,22 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="28dp"
+            android:layout_height="1dp"
+            style="@style/horizontalRow"/>
+
+        <TextView
+            android:id="@+id/helpCenterBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Help Center"
+            android:layout_marginTop="2dp"
+            android:paddingVertical="16dp"
+            android:paddingHorizontal="32dp"
+            style="@style/settingsItems"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
             style="@style/horizontalRow"/>
 
         <TextView

@@ -165,90 +165,63 @@ public class MonthlySupplyActivity extends AppCompatActivity {
         MainActivity.db.child("Monthly").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.exists()){
-                    datalist.clear();
-                    for (DataSnapshot ds: snapshot.getChildren()){
-                        if(data.equals("")){
-                            if(DashboardActivity.getRole().equals("admin")){
-                                MonthlyModel model = new MonthlyModel(ds.getKey(),
-                                        ds.child("name").getValue().toString(),
-                                        ds.child("contact").getValue().toString(),
-                                        ds.child("balance").getValue().toString(),
-                                        ds.child("userId").getValue().toString(),
-                                        ds.child("MonthlyDetail").getValue().toString(),
-                                        ds.child("milkRate").getValue().toString()
-                                );
-                                datalist.add(model);
-                            } else {
-                                if(UID.equals(ds.child("userId").getValue().toString())){
-                                    MonthlyModel model = new MonthlyModel(ds.getKey(),
-                                            ds.child("name").getValue().toString(),
-                                            ds.child("contact").getValue().toString(),
-                                            ds.child("balance").getValue().toString(),
-                                            ds.child("userId").getValue().toString(),
-                                            ds.child("MonthlyDetail").getValue().toString(),
-                                            ds.child("milkRate").getValue().toString()
-                                    );
-                                    datalist.add(model);
-                                }
-                            }
-                        } else {
-                            if(ds.child("name").getValue().toString().trim().toLowerCase().contains(data.toLowerCase().trim())){
-                                if(DashboardActivity.getRole().equals("admin")){
-                                    MonthlyModel model = new MonthlyModel(ds.getKey(),
-                                            ds.child("name").getValue().toString(),
-                                            ds.child("contact").getValue().toString(),
-                                            ds.child("balance").getValue().toString(),
-                                            ds.child("userId").getValue().toString(),
-                                            ds.child("MonthlyDetail").getValue().toString(),
-                                            ds.child("milkRate").getValue().toString()
-                                    );
-                                    datalist.add(model);
-                                } else {
-                                    if(UID.equals(ds.child("userId").getValue().toString())){
-                                        MonthlyModel model = new MonthlyModel(ds.getKey(),
-                                                ds.child("name").getValue().toString(),
-                                                ds.child("contact").getValue().toString(),
-                                                ds.child("balance").getValue().toString(),
-                                                ds.child("userId").getValue().toString(),
-                                                ds.child("MonthlyDetail").getValue().toString(),
-                                                ds.child("milkRate").getValue().toString()
-                                        );
-                                        datalist.add(model);
-                                    }
-                                }
-                            }
+                datalist.clear();
+                boolean isAdmin = DashboardActivity.getRole().equals("admin");
+                String searchTerm = data.trim().toLowerCase();
+                if (snapshot.exists()) {
+                    for (DataSnapshot ds : snapshot.getChildren()) {
+                        // Skip if search query doesn't match (unless empty)
+                        if (!searchTerm.isEmpty() &&
+                                !ds.child("name").getValue(String.class).trim().toLowerCase().contains(searchTerm)) {
+                            continue;
                         }
 
-                    }
-                    if(datalist.size() > 0){
-                        loader.setVisibility(View.GONE);
-                        listView.setVisibility(View.VISIBLE);
-                        notfoundContainer.setVisibility(View.GONE);
-                        if(sortingStatus.equals("dsc")){
-                            Collections.reverse(datalist);
+                        // Skip if not admin and UID doesn't match
+                        if (!isAdmin && !UID.equals(ds.child("userId").getValue(String.class))) {
+                            continue;
                         }
-                        MyAdapter adapter = new MyAdapter(MonthlySupplyActivity.this,datalist);
-                        listView.setAdapter(adapter);
-                    } else {
-                        loader.setVisibility(View.GONE);
-                        listView.setVisibility(View.GONE);
-                        notfoundContainer.setVisibility(View.VISIBLE);
-                        if(!data.equals("")){
-                            notfoundContainer.setVisibility(View.VISIBLE);
-                        }
+
+                        // Create and add model
+                        MonthlyModel model = new MonthlyModel(ds.getKey(),
+                                ds.child("name").getValue(String.class),
+                                ds.child("contact").getValue(String.class),
+                                ds.child("balance").getValue(String.class),
+                                ds.child("userId").getValue(String.class),
+                                ds.child("MonthlyDetail").getValue().toString(),
+                                ds.child("milkRate").getValue(String.class)
+                        );
+                        datalist.add(model);
                     }
-                    totalCount.setText(datalist.size()+" found");
+                }
+
+                if (datalist.size() > 0) {
+                    loader.setVisibility(View.GONE);
+                    listView.setVisibility(View.VISIBLE);
+                    notfoundContainer.setVisibility(View.GONE);
+
+                    if (sortingStatus.equals("dsc")) {
+                        Collections.reverse(datalist);
+                    }
+
+                    MyAdapter adapter = new MyAdapter(MonthlySupplyActivity.this, datalist);
+                    listView.setAdapter(adapter);
                 } else {
                     loader.setVisibility(View.GONE);
                     listView.setVisibility(View.GONE);
                     notfoundContainer.setVisibility(View.VISIBLE);
+
+                    if (!searchTerm.isEmpty()) {
+                        notfoundContainer.setVisibility(View.VISIBLE);
+                    }
                 }
+
+                totalCount.setText(datalist.size() + " found");
+
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                loader.setVisibility(View.GONE);
             }
         });
     }

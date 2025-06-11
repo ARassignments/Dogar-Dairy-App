@@ -419,6 +419,24 @@
         <item name="android:tint">@color/white</item>
     </style>
 
+    <style name="incomingChatBg">
+        <item name="android:background">@drawable/incoming_chat_bg</item>
+        <item name="android:backgroundTint">@color/neutral_80</item>
+    </style>
+
+    <style name="tabText">
+        <item name="android:fontFamily">@font/poppins_semibold</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/neutral_60</item>
+        <item name="textAllCaps">false</item>
+        <item name="android:letterSpacing">0.0</item>
+    </style>
+
+    <style name="listImageBg">
+        <item name="android:background">@color/neutral_70</item>
+        <item name="android:tint">@color/neutral_20</item>
+    </style>
+
     <style name="dashboardBestsellerTitle">
         <item name="android:fontFamily">@font/poppins_medium</item>
         <item name="android:textSize">16sp</item>
@@ -624,6 +642,13 @@
         <item name="android:fontFamily">@font/poppins_regular</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">@color/neutral_50</item>
+    </style>
+
+    <style name="CustomCategoryChipStyle" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="android:textSize">11sp</item>
+        <item name="android:fontFamily">@font/poppins_regular</item>
+        <item name="android:textColor">@color/neutral_20</item>
+        <item name="chipBackgroundColor">@color/neutral_70</item>
     </style>
 
 </resources>

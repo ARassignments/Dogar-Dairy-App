@@ -16,7 +16,8 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="32"
         tools:ignore="ScopedStorage" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
     <application
@@ -30,10 +31,28 @@
         android:theme="@style/Theme.DogarDairy"
         tools:targetApi="31">
         <activity
+            android:name=".Screens.MessagesDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Screens.MessagesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Screens.PrivacyPolicyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Screens.SubscriptionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Screens.HelpCenterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Screens.CustomerServiceActivity"
+            android:exported="false" />
+        <activity
             android:name=".Screens.BillActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="DiscouragedApi,LockedOrientationActivity"/>
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
