@@ -166,6 +166,7 @@
             android:gravity="center">
 
             <LinearLayout
+                android:id="@+id/shopSupplyBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -240,6 +241,7 @@
             android:gravity="center">
 
             <LinearLayout
+                android:id="@+id/stockMilkBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -272,6 +274,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/creditBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -312,6 +315,7 @@
             android:gravity="center">
 
             <LinearLayout
+                android:id="@+id/expencesBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -344,6 +348,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/workersPayBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"

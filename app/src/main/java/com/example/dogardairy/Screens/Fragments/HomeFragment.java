@@ -50,6 +50,12 @@ public class HomeFragment extends Fragment {
         chatBtn = view.findViewById(R.id.chatBtn);
         faqBtn = view.findViewById(R.id.faqBtn);
 
+        view.findViewById(R.id.shopSupplyBtn).setAlpha(0.5f);
+        view.findViewById(R.id.stockMilkBtn).setAlpha(0.5f);
+        view.findViewById(R.id.creditBtn).setAlpha(0.5f);
+        view.findViewById(R.id.expencesBtn).setAlpha(0.5f);
+        view.findViewById(R.id.workersPayBtn).setAlpha(0.5f);
+
         view.findViewById(R.id.seeMoreBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

@@ -44,6 +44,7 @@ import com.example.dogardairy.MainActivity;
 import android.Manifest;
 import com.example.dogardairy.Models.ItemsModel;
 import com.example.dogardairy.Models.MonthlyDetailModel;
+import com.example.dogardairy.Models.PaymentMethodModel;
 import com.example.dogardairy.R;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -227,10 +228,30 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
                 });
 
                 ArrayList<String> paymentMethods = new ArrayList<String>();
-                paymentMethods.add("Cash");
-                paymentMethods.add("Bank Transfer");
-                paymentMethods.add("Easy Paisa");
-                paymentMethods.add("Jazz Cash");
+//                paymentMethods.add("Cash");
+//                paymentMethods.add("Bank Transfer");
+//                paymentMethods.add("Easy Paisa");
+//                paymentMethods.add("Jazz Cash");
+
+                MainActivity.db.child("PaymentMethods").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.exists()){
+                            paymentMethods.clear();
+                            for (DataSnapshot ds: snapshot.getChildren()){
+                                PaymentMethodModel model = new PaymentMethodModel(ds.getKey(),
+                                        ds.child("name").getValue().toString()
+                                );
+                                paymentMethods.add(model.getName());
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
 
                 ArrayAdapter<String> adapter = new ArrayAdapter<String>(MonthlySupplyDetailActivity.this, android.R.layout.simple_dropdown_item_1line,paymentMethods);
                 paymentMethodInput.setAdapter(adapter);

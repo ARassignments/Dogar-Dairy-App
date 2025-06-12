@@ -102,6 +102,13 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.paymentMethodBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(SettingsActivity.this, PaymentMethodActivity.class));
+            }
+        });
+
 
         findViewById(R.id.viewProfileBtn).setOnClickListener(new View.OnClickListener() {
             @Override
