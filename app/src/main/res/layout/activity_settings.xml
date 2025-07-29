@@ -153,6 +153,38 @@
             android:layout_height="28dp"
             style="@style/horizontalRow"/>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:paddingEnd="32dp"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/themeModeBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Dark Mode"
+                android:drawableStart="@drawable/moon"
+                android:paddingVertical="16dp"
+                android:paddingHorizontal="32dp"
+                android:layout_weight="1"
+                style="@style/settingsItems"/>
+
+            <Switch
+                android:id="@+id/themeSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                tools:ignore="UseSwitchCompatOrMaterialXml"
+                style="@style/settingsSwitch"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            style="@style/horizontalRow"/>
+
         <TextView
             android:id="@+id/subscriptionBtn"
             android:layout_width="match_parent"

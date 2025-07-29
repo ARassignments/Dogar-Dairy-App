@@ -493,6 +493,11 @@
         <item name="android:textColor">@color/neutral_20</item>
     </style>
 
+    <style name="settingsSwitch">
+        <item name="android:thumbTint">@color/white</item>
+        <item name="android:trackTint">@color/white</item>
+    </style>
+
     <style name="usernameTitle">
         <item name="android:fontFamily">@font/poppins_medium</item>
         <item name="android:textSize">16sp</item>

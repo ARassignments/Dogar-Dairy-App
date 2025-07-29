@@ -90,7 +90,8 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
     SharedPreferences.Editor editor;
     static String UID = "";
     static String sortingStatus = "dsc";
-    String MonthlyId, currentDate, contact, personName, currentMonth, currentReportDate, milkRate;
+    static String currentDate, currentMonth, currentReportDate;
+    String MonthlyId, contact, personName, milkRate;
     ListView listView;
     LinearLayout notfoundContainer;
     TextView totalQty, grandTotalAmount, balancedAmount, date, appBarTitle;
@@ -414,6 +415,48 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
             sortBtn.setImageResource(R.drawable.asscending_order);
         }
         fetchData();
+    }
+
+    public void selectDate(){
+        Dialog alertdialog = new Dialog(MonthlySupplyDetailActivity.this);
+        alertdialog.setContentView(R.layout.dialog_calendar);
+        alertdialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+        alertdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        alertdialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+        alertdialog.getWindow().setGravity(Gravity.CENTER);
+        alertdialog.setCancelable(false);
+        alertdialog.setCanceledOnTouchOutside(false);
+
+        DatePicker datePicker = alertdialog.findViewById(R.id.datePicker);
+        Button selectBtn, cancelBtn;
+        selectBtn = alertdialog.findViewById(R.id.selectBtn);
+        cancelBtn = alertdialog.findViewById(R.id.cancelBtn);
+
+        selectBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String selectedDate = datePicker.getYear()+"/"+(datePicker.getMonth()+1);
+
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth()); // Set selected date
+
+                dateView.setText(new SimpleDateFormat("dd MMM").format(calendar.getTime()));
+                date.setText(selectedDate);
+                currentMonth = new DateFormatSymbols().getMonths()[datePicker.getMonth()] +", "+datePicker.getYear();
+                currentReportDate = new DateFormatSymbols().getMonths()[datePicker.getMonth()] +", "+datePicker.getYear();
+                fetchData();
+                alertdialog.dismiss();
+            }
+        });
+
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertdialog.dismiss();
+            }
+        });
+
+        alertdialog.show();
     }
 
     public void fetchData(){
@@ -1020,6 +1063,8 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         alertdialog.show();
     }
 
+
+
     public void addQuantity(){
         addQtyDialog = new Dialog(MonthlySupplyDetailActivity.this);
         addQtyDialog.setContentView(R.layout.dialog_add_quantity);
@@ -1051,6 +1096,13 @@ public class MonthlySupplyDetailActivity extends AppCompatActivity {
         String dateTime = simpleDateFormat.format(calendar.getTime());
         dateView.setText(dateTime);
         // current date picker
+
+        dateView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectDate();
+            }
+        });
 
         qtyInput.addTextChangedListener(new TextWatcher() {
             @Override

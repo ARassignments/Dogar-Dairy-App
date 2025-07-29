@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
@@ -13,6 +14,7 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.telephony.SmsManager;
 import android.view.Gravity;
 import android.view.View;
@@ -24,6 +26,7 @@ import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
@@ -61,9 +64,11 @@ public class MainActivity extends AppCompatActivity {
         editor = sharedPreferences.edit();
 
         if(db == null){
-            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+//            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
             db = FirebaseDatabase.getInstance().getReference();
         }
+
+        applyTheme();
 
         if(!sharedPreferences.getString("UID","").equals("")){
             UID = sharedPreferences.getString("UID","").toString();
@@ -92,6 +97,38 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(MainActivity.this, SplashScreenActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    public void saveTheme(boolean darkMode) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        preferences.edit().putBoolean("dark_mode", darkMode).apply();
+    }
+
+    public boolean isDarkMode() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        return preferences.getBoolean("dark_mode", false);
+    }
+
+    public void applyTheme() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        if (!preferences.contains("dark_mode")) {
+            boolean isSystemDark = isSystemDarkMode();
+            AppCompatDelegate.setDefaultNightMode(
+                    isSystemDark ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO
+            );
+            saveTheme(isSystemDark); // Save it for future
+        } else {
+            boolean isDark = preferences.getBoolean("dark_mode", false);
+            AppCompatDelegate.setDefaultNightMode(
+                    isDark ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO
+            );
+        }
+    }
+
+    public boolean isSystemDarkMode() {
+        int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
     }
 
     private void checkStoragePermission() {
